@@ -4,7 +4,7 @@ version 2
 :: gfx/
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0yOCAxNzo1Mjo0OSIscmV2aXNpb249MTcyXV1sejQAsQQAAH81AADzLntbMF09e2JtcD1weHUA
+Ni0yOCAyMjozNToxNiIscmV2aXNpb249MTgwXV1sejQAsQQAAH81AADzLntbMF09e2JtcD1weHUA
 QyAQEATwNyLADxQYwA4IDx-ADggNwBgNwC3ALsAvGPA2LGZsYWdzPTAscGFuX3gIAMp5PTAsem9v
 bT04fSxLAC-38DEAHLAXBQ0WB0YNBUcNdgUA8AdGByYFNwUNhkcFDQYHZgU3BYYNBTcVGwCABUYH
 Fg0FR4YmAAAyABBHOQCyVkcFDYYFNwU2B0YnAFA3FQYHJikAMTcFDTEAHxfBAB3wAToG1wYHBg1X
@@ -28,11 +28,11 @@ tyWnRgUQBg8H8AxHJQcGFwUOBRcGJwUOBTclBwY3JQYnFgVXJWc7Aj8W9wBdCB8v8PAxAP------
 --------------------------------------------------8UUG09OH19
 :: gfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0yOCAxNzo1Mjo0OSJdXQ==
+Ni0yOCAyMjozNToxNiJdXQ==
 :: map/
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0yOCAxNzo1Mjo0OSIscmV2aXNpb249MTYxXV1sejQAhgEAAFgQAADwCHt7Ym1wPXVzZXJkYXRh
+Ni0yOCAyMjozNToxNiIscmV2aXNpb249MTY5XV1sejQAhgEAAFgQAADwCHt7Ym1wPXVzZXJkYXRh
 KCJpMTYiLDMyAwBfIjAwMDEEAP------IVJlMDAwZgwAIzFjFAAEBAAXYQwADwQARVM4MDAwYgwA
 EzMIABNmGAASMQQALzE0kABMBFgAFzJ4ABNlCAATY5gAB5AADwQAMQFsAVc5MDAwNgQAFzUMAAAE
 ABM3JAASNQwAAQgBHmWoAQ_IACoEXAETOAABE2MUABdkmAEXMpgBHzF8AUATZggAEzLcAJM4MDAx
@@ -42,19 +42,19 @@ JjFlFAAEIAEPBABSFmaEAC8wMQQAYQ58AA8EAP----8X8QgiKSxoaWRkZW49ZmFsc2UscGFuX3g9
 MAgA0nk9MCx0aWxlX2g9MTYKABB3CgCAem9vbT0xfX0=
 :: map/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0yOCAxNzo1Mjo0OSJdXQ==
+Ni0yOCAyMjozNToxNiJdXQ==
 :: sfx/
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0yOCAxNzo1Mjo0OSIscmV2aXNpb249MTE3XV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
+Ni0yOCAyMjozNToxNiIscmV2aXNpb249MTI1XV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
 Ag4AAaABIAKgDgAPEAAN8MoBAgNADw_QBAUGB0AMkAgJCgtADJAPDA8NDw4MQAzw-wEA6-8nqgEQ
 Bg8gEAEgASAB8AACEAIOEAEgDyEgATAPQPDDDygP--DGD-gKD-8PgA-3Dw0B8AkBEAYOMAD-----
 -70f-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: sfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0yOCAxNzo1Mjo0OSJdXQ==
+Ni0yOCAyMjozNToxNiJdXQ==
 :: main.lua
---[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-28 17:52:49",revision=173]]
+--[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-28 22:35:16",revision=183]]
 include 'player.lua'
 include 'user_interface.lua'
 
@@ -83,12 +83,13 @@ end
 function _draw()
   cls()
   map()
+  -- desenhar jogador
   player:Draw()
-  
+  -- desenhar gui
   interface:Draw()
 end
 :: player.lua
---[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-28 17:52:49",revision=76]]
+--[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-28 22:35:16",revision=86]]
 -- Definindo a "classe" Player
 Player={}
 
@@ -111,7 +112,7 @@ function Player:Draw()
 end
 
 :: user_interface.lua
---[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-28 17:52:49",revision=57]]
+--[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-28 22:35:16",revision=67]]
 UserInterface = {}
 
 function UserInterface:New()
@@ -124,14 +125,14 @@ function UserInterface:New()
 end
 
 function UserInterface:Draw()
-  rect(0,0, 120, 120, 0)
+  rect(0, 0, 120, 120, 0)
 end
 :: .info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjEwOjA0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0yOCAxNzo1Mjo0OSIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
-IzEiLHdvcmtzcGFjZV9pbmRleD0xfSx7bG9jYXRpb249InBsYXllci5sdWEjNSIsd29ya3NwYWNl
-X2luZGV4PTF9LHtsb2NhdGlvbj0idXNlcl9pbnRlcmZhY2UubHVhIzEzIix3b3Jrc3BhY2VfaW5k
-ZXg9MX0se2xvY2F0aW9uPSJnZngvMC5nZngiLHdvcmtzcGFjZV9pbmRleD0yfSx7bG9jYXRpb249
-Im1hcC8wLm1hcCIsd29ya3NwYWNlX2luZGV4PTN9LHtsb2NhdGlvbj0ic2Z4LzAuc2Z4Iix3b3Jr
-c3BhY2VfaW5kZXg9NH19XV0=
+Ni0yOCAyMjozNToxNiIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
+IzI4Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0aW9uPSJwbGF5ZXIubHVhIzEiLHdvcmtzcGFj
+ZV9pbmRleD0xfSx7bG9jYXRpb249InVzZXJfaW50ZXJmYWNlLmx1YSMxMyIsd29ya3NwYWNlX2lu
+ZGV4PTF9LHtsb2NhdGlvbj0iZ2Z4LzAuZ2Z4Iix3b3Jrc3BhY2VfaW5kZXg9Mn0se2xvY2F0aW9u
+PSJtYXAvMC5tYXAiLHdvcmtzcGFjZV9pbmRleD0zfSx7bG9jYXRpb249InNmeC8wLnNmeCIsd29y
+a3NwYWNlX2luZGV4PTR9fV1d
 :: [eoc]
