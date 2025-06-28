@@ -1,0 +1,137 @@
+picotron cartridge // www.picotron.net
+version 2
+
+:: gfx/
+:: gfx/0.gfx
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
+Ni0yOCAxNzo1Mjo0OSIscmV2aXNpb249MTcyXV1sejQAsQQAAH81AADzLntbMF09e2JtcD1weHUA
+QyAQEATwNyLADxQYwA4IDx-ADggNwBgNwC3ALsAvGPA2LGZsYWdzPTAscGFuX3gIAMp5PTAsem9v
+bT04fSxLAC-38DEAHLAXBQ0WB0YNBUcNdgUA8AdGByYFNwUNhkcFDQYHZgU3BYYNBTcVGwCABUYH
+Fg0FR4YmAAAyABBHOQCyVkcFDYYFNwU2B0YnAFA3FQYHJikAMTcFDTEAHxfBAB3wAToG1wYHBg1X
+BQcWFyYNVwVQALAGBw0FV3YNFTcNFg4AAnwA3wYHNkcFDVYHBgcFJxWBAAgPEQE8ElZdAEAHVgcG
+FgEwBgcWsAD-CwcGFw1HDQYXBvcCBvcCDVcGJwY3BvcIBvcJfwAkMCcNB4EA8BgNBxUNVgc2DQUd
+Fg12BQYNRgf2GAcWB2YHhgf2AgdWB3YH9gkdBg3yAOMGDQYdBQ0FhgUNFQcdBQYBLw0niAElvxAl
+BgUHJQcGFQYVfAAWrxZFFgUNFTcG9wtuACXwBkcdFg1mN0YHJgcmJ7Y3ZgdWFwYHZl8BoCcmB4Yn
+VgdGN1YCAjM3xid6ABBHdwBPFQcFp3UAIN8jDw-3Jw73PQaXDvcrPQAdEhYcAfIcd0YFBg0nFgeW
+FwYHticGF3YHBhcGNxYHVmeGNwYnRgcWBxY3hje2Jw0GJycBIGclJAEv9xBwAB3wDQgPE9cOAdcO
+EbceEQanDgEOARaHLiEGBwZXLgEOAP8nBhcGJw4TDkEmN24hBlceEQ4hFgcGVw4RJgcWZwYPFA8V
+BrcPFg8UFg8WFwZXDScNBwYNpw13hgAd8AFFbxWHZVcGFwUPFi8VDxYFmwEA8gBAZRZXBuwAUWcG
+ZwYXBAAv9zdcAB0QZ6YAQJcPFicIAP8KFw8Whx4PFQ8UDgcehw4HHvcADpcOFw73J1YAHcDAKJc4
+DxgIlAgOGA4GAB8IQQAd8ApDDxUnDrcFBw4nBVclDgUnDgcOhw4FBxUnfAHwAg4FFxYHBncOBTcG
+BwZnDgUn-gBvDgUHBvcmaAAd8AYqDxsPDw8b1w73KQ4PDw7XDvcjDgcHAB8USgAc-wzwJw8U0C7A
+IcAvENAN0C0FsC8VwC3ADw0NDPCUAR0v8PAxAH7-Cfc1FpdG9wUGZzYHFrcG9wMm1wb3Byb3KkcA
+HBgIFALxFDiUKC6fFV6UXpQuBR6dHhUenR4FAR4tPxQtHgEFHi08LR4VBgAAFQCwHAQMLR4BLi08
+LV4EAE_WXpYuwgAdMCAW18QE8gUGBwY3dnc2BzZnLSYnBlctByaHLVADgWctBxaXLRanDwCfhy0X
+Bpctxy3HiwEeDzEA4P8E9zMPDzcO9wEulw73DA73JB73NUIAHPAdJZZVliUnlVeVZyYHNoc2BwaH
+FgcmFwaXFgcGlwYHBucGBwanJhcGdwYHRpdlBzIGpwYaAI8nBgcmJwZHBlQFHtAmBQ8VBQcGpyUG
+tyWnRgUQBg8H8AxHJQcGFwUOBRcGJwUOBTclBwY3JQYnFgVXJWc7Aj8W9wBdCB8v8PAxAP------
+--------------------------------------------------8UUG09OH19
+:: gfx/.info.pod
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
+Ni0yOCAxNzo1Mjo0OSJdXQ==
+:: map/
+:: map/0.map
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
+Ni0yOCAxNzo1Mjo0OSIscmV2aXNpb249MTYxXV1sejQAhgEAAFgQAADwCHt7Ym1wPXVzZXJkYXRh
+KCJpMTYiLDMyAwBfIjAwMDEEAP------IVJlMDAwZgwAIzFjFAAEBAAXYQwADwQARVM4MDAwYgwA
+EzMIABNmGAASMQQALzE0kABMBFgAFzJ4ABNlCAATY5gAB5AADwQAMQFsAVc5MDAwNgQAFzUMAAAE
+ABM3JAASNQwAAQgBHmWoAQ_IACoEXAETOAABE2MUABdkmAEXMpgBHzF8AUATZggAEzLcAJM4MDAx
+NTAwMTaAARMyIAAOhAEPBAAzE2MIABM0aAAAGAETZBQABBgBCCgADwQAQBQxeAEMFAIXNgACD4AA
+RQcEBCcwMfgAF2EYAR9mAAFEE2aAABJlEAAuMTRsAScxY5QAHzGEAEQeMXAABYwADwQAXCIxZZQA
+JjFlFAAEIAEPBABSFmaEAC8wMQQAYQ58AA8EAP----8X8QgiKSxoaWRkZW49ZmFsc2UscGFuX3g9
+MAgA0nk9MCx0aWxlX2g9MTYKABB3CgCAem9vbT0xfX0=
+:: map/.info.pod
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
+Ni0yOCAxNzo1Mjo0OSJdXQ==
+:: sfx/
+:: sfx/0.sfx
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
+Ni0yOCAxNzo1Mjo0OSIscmV2aXNpb249MTE3XV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
+Ag4AAaABIAKgDgAPEAAN8MoBAgNADw_QBAUGB0AMkAgJCgtADJAPDA8NDw4MQAzw-wEA6-8nqgEQ
+Bg8gEAEgASAB8AACEAIOEAEgDyEgATAPQPDDDygP--DGD-gKD-8PgA-3Dw0B8AkBEAYOMAD-----
+-70f-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
+:: sfx/.info.pod
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
+Ni0yOCAxNzo1Mjo0OSJdXQ==
+:: main.lua
+--[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-28 17:52:49",revision=173]]
+include 'player.lua'
+include 'user_interface.lua'
+
+function _init()
+  player = Player:New()
+  interface = UserInterface:New()
+end
+
+function _update()
+  if btn(0) then
+    player.x-=1
+    player.IsFlipped=true
+  end
+  if btn(1) then
+    player.x+=1
+    player.IsFlipped=false
+  end
+  if btn(2) then
+    player.y-=1
+  end
+  if btn(3) then
+    player.y+=1
+  end
+end
+
+function _draw()
+  cls()
+  map()
+  player:Draw()
+  
+  interface:Draw()
+end
+:: player.lua
+--[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-28 17:52:49",revision=76]]
+-- Definindo a "classe" Player
+Player={}
+
+function Player:New(x, y)
+	local obj = {
+		x = x or 120,
+		y = y or 120,
+      SpriteId=16,
+      IsFlipped=false		
+	}
+	setmetatable(obj, self)
+	self.__index = self
+	return obj
+end
+
+-- Desenhando em tela
+function Player:Draw()
+  spr(self.SpriteId, self.x, self.y, self.IsFlipped)
+  camera(self.x - 120, self.y - 120)
+end
+
+:: user_interface.lua
+--[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-28 17:52:49",revision=57]]
+UserInterface = {}
+
+function UserInterface:New()
+	local obj = {
+	
+	}
+	setmetatable(obj, self)
+	self.__index = self
+	return obj
+end
+
+function UserInterface:Draw()
+  rect(0,0, 120, 120, 0)
+end
+:: .info.pod
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjEwOjA0Iixtb2RpZmllZD0iMjAyNS0w
+Ni0yOCAxNzo1Mjo0OSIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
+IzEiLHdvcmtzcGFjZV9pbmRleD0xfSx7bG9jYXRpb249InBsYXllci5sdWEjNSIsd29ya3NwYWNl
+X2luZGV4PTF9LHtsb2NhdGlvbj0idXNlcl9pbnRlcmZhY2UubHVhIzEzIix3b3Jrc3BhY2VfaW5k
+ZXg9MX0se2xvY2F0aW9uPSJnZngvMC5nZngiLHdvcmtzcGFjZV9pbmRleD0yfSx7bG9jYXRpb249
+Im1hcC8wLm1hcCIsd29ya3NwYWNlX2luZGV4PTN9LHtsb2NhdGlvbj0ic2Z4LzAuc2Z4Iix3b3Jr
+c3BhY2VfaW5kZXg9NH19XV0=
+:: [eoc]
