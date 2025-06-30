@@ -4,37 +4,39 @@ version 2
 :: gfx/
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMDo1NToyNCIscmV2aXNpb249NDQxXV1sejQAuwAAAEMxAADzFHtbMF09e2JtcD1weHUA
+Ni0zMCAwMTo0NzozMyIscmV2aXNpb249NTM0XV1sejQA2QAAAFkxAADzFHtbMF09e2JtcD1weHUA
 QyAQEATw8CxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sMQDRHDA-EDAsUB5QDGAe0AIAtWAO
-UB5Q-hJQHlAOEwCTDFAeUCwwPjAcXgAfMV4AFKAI0AjwRggQCPAcBQBPRgjQCJ8AHC--GtEAHR-w
-MQD---------------------------------------------------------------9FUG09OH19
+UB5Q-hJQHlAOEwCfDFAeUCwwPjAcXgAcoAjQCPBGCBAI8BwFAE9GCNAIQQAcJP8a0QAfMTIAFPEA
+Ct8aCv4pDxsODd4N-jkNBwBPKgreCkcADg9JAQUPMQD---------------------------------
+------------------------------8LUG09OH19
 :: gfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMDo1NToyNCJdXQ==
+Ni0zMCAwMTo0NzozMyJdXQ==
 :: map/
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMDo1NToyNCIscmV2aXNpb249NDMzXV1sejQA9wAAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
-KCJpMTYiLDMyAwBfIjAwMDEEABQfMwQAHB8xBAAYHzMEAGEPgAD-jR8xBAA4HzMEAAEPIAAMDhgA
-DwQAIx8xHAAMDyAAAg4YAA8EACYfMRwADA8gAAIOGAAPBAAmHzEcAEAOBAAPSAAkD4AA--------
-9h8xOAAJDwQAMB8xHAAMHzEcAAUPBAA4HzMEAAEOIAAPBABDD4AA--8SDwQADR8zBAAkHzEEAA3x
-CiIpLGhpZGRlbj1mYWxzZSxwYW5feD0tNjQKAON5PS05Nix0aWxlX2g9MQoAEHcKAKB6b29tPTAu
-NX19
+Ni0zMCAwMTo0NzozMyIscmV2aXNpb249NTIzXV1sejQAWQEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
+KCJpMTYiLDMyAwBfIjAwMDEEABQfMwQAHB8xBAAYHzMEAGEPgAD-jR8xBAAQFzQMAA8EAAkfMwQA
+AQ8gAAwOGAAPBAAjHzEcAAwPIAACDxgACAQEABc0DAAOBAAPSAATHzEgAAgPGAAFHzOYABwOSAAP
+HAAUD_wAGQ9kACQPOABBD4AAyQyIAR80gABcDwQADR80gABsD0gAOQ5cAQ9IACQPAAGkHzHMABQf
+NIAAWA8EAAIPgAB8HzSAAGwfM4AAwA5kAg_AAFsfM4AASB8xOAAJDwQAMB8xHAAMHzEcAAwPBAAF
+FzQMAA8EAA0fMwQAAQ4gAA8EAEMPgAD--xIPBAANHzMEACQfMQQADfEKIiksaGlkZGVuPWZhbHNl
+LHBhbl94PS02NAoA43k9LTk2LHRpbGVfaD0xCgAQdwoAoHpvb209MC41fX0=
 :: map/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMDo1NToyNCJdXQ==
+Ni0zMCAwMTo0NzozMyJdXQ==
 :: sfx/
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMDo1NToyNCIscmV2aXNpb249MzY2XV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
+Ni0zMCAwMTo0NzozMyIscmV2aXNpb249NDUyXV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
 Ag4AAaABIAKgDgAPEAAN8MoBAgNADw_QBAUGB0AMkAgJCgtADJAPDA8NDw4MQAzw-wEA6-8nqgEQ
 Bg8gEAEgASAB8AACEAIOEAEgDyEgATAPQPDDDygP--DGD-gKD-8PgA-3Dw0B8AkBEAYOMAD-----
 -70f-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: sfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMDo1NToyNCJdXQ==
+Ni0zMCAwMTo0NzozMyJdXQ==
 :: main.lua
---[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-30 00:55:24",revision=468]]
+--[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-30 01:47:33",revision=568]]
 include 'player.lua'
 include 'user_interface.lua'
 include 'mapa.lua'
@@ -46,26 +48,26 @@ function _init()
 end
 
 function _update()
-  player:CheckMove()
+  mapa:Calc()
   if btn(0) then
-    if player.CanDown then
+    if mapa.CanLeft then
 	    player.x -= player.Speed
 	    player.IsFlipped = true
     end
   end
   if btn(1) then
-    if player.CanUp then
+    if mapa.CanRigth then
 	    player.x += player.Speed
 	    player.IsFlipped = false
     end
   end
   if btn(2) then
-    if player.CanLeft then
+    if mapa.CanUp then
     	player.y -= player.Speed
     end
   end
   if btn(3) then
-    if player.CanRigth then
+    if mapa.CanDown then
     	player.y += player.Speed
     end
   end
@@ -76,21 +78,28 @@ function _draw()
   cls() 
   -- desenhar mapa  
   mapa:Draw()
-  mapa:Calc()
   -- desenhar jogador
   player:Draw()
   -- desenhar gui
   interface:Draw()  
 end
 :: mapa.lua
---[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-06-30 00:55:24",revision=54]]
+--[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-06-30 01:47:33",revision=172]]
 Mapa = {}
 
 function Mapa:New()
 	local obj = {
 	  TileCentralX = 0,
 	  TileCentralY = 0,
-	  TileCentralIndex =- 1
+	  TileCentralIndex =- 1,
+	  TileUp =- 1,
+	  TileDown =- 1,	  
+	  TileLeft =- 1,	  
+	  TileRigth =- 1,	  
+     CanUp=true,
+     CanDown=true,
+     CanLeft=true,
+     CanRigth=true	  
 	}
 	setmetatable(obj, self)
 	self.__index = self
@@ -103,12 +112,26 @@ function Mapa:Draw()
 end
 
 function Mapa:Calc()
- self.TileCentralX = flr((player.x + 8)/16)
- self.TileCentralY = flr((player.y + 8)/16)
+ -- buscar o tile atual
+ self.TileCentralX = flr((player.x + 8) / 16)
+ self.TileCentralY = flr((player.y + 8) / 16)
  self.TileCentralIndex = mget(self.TileCentralX, self.TileCentralY) or -1
+ 
+ -- buscar os tiles que estao do lado do atual
+ self.TileUp    = mget(self.TileCentralX     , self.TileCentralY - 1) or -1
+ self.TileDown  = mget(self.TileCentralX     , self.TileCentralY + 1) or -1
+ self.TileLeft  = mget(self.TileCentralX - 1 , self.TileCentralY    ) or -1
+ self.TileRigth = mget(self.TileCentralX + 1 , self.TileCentralY    ) or -1
+ 
+ -- verificar se podemso movimentar para os lados
+ self.CanUp    = fget(self.TileUp,    0)
+ self.CanDown  = fget(self.TileDown,  0)
+ self.CanLeft  = fget(self.TileLeft,  0)
+ self.CanRigth = fget(self.TileRigth, 0)
+    
 end
 :: player.lua
---[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-30 00:55:24",revision=353]]
+--[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-30 01:47:33",revision=445]]
 -- Definindo a "classe" Player
 Player={}
 
@@ -118,11 +141,7 @@ function Player:New(x, y)
 		y = y or 120,
 		Speed=1,
       SpriteId=2,
-      IsFlipped=false,
-      CanUp=true,
-      CanDown=true,
-      CanLeft=true,
-      CanRigth=true
+      IsFlipped=false
 	}
 	setmetatable(obj, self)
 	self.__index = self
@@ -134,16 +153,8 @@ function Player:Draw()
   spr(self.SpriteId, self.x, self.y, self.IsFlipped)
   camera(self.x - 120, self.y - 120)
 end
-
-function Player:CheckMove()
- -- pegar a flag dos sprites ao redor com fget
- self.CanUp=true
- self.CanDown=true
- self.CanLeft=true
- self.CanRigth=true 
-end
 :: user_interface.lua
---[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-30 00:55:24",revision=449]]
+--[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-30 01:47:33",revision=565]]
 include 'player.lua'
 include 'mapa.lua'
 
@@ -185,16 +196,40 @@ function UserInterface:Draw()
  print("Sprite: ".. mapa.TileCentralX .. "|" .. mapa.TileCentralY, self.FontColor)
 
  print("mget: ".. mapa.TileCentralIndex, self.FontColor)
- spr(mapa.TileCentralIndex, player.x + 245, player.y - 60) 
-  
+ spr(mapa.TileCentralIndex, player.x + 325, player.y - 80) 
+ 
+ if mapa.CanUp then
+   print("up " .. mapa.TileUp, player.x + 245, player.y - 40, 11)
+ else
+   print("up " .. mapa.TileUp, player.x + 245, player.y - 40, 8) 
+ end
+ 
+ if mapa.CanDown then
+   print("down " .. mapa.TileDown, 11)
+ else
+   print("down " .. mapa.TileDown, 8) 
+ end
+
+ if mapa.CanLeft then
+   print("left " .. mapa.TileLeft, 11)
+ else
+   print("left " .. mapa.TileLeft, 8) 
+ end 
+
+ if mapa.CanRigth then
+   print("rigth " .. mapa.TileRigth, 11)
+ else
+   print("rigth " .. mapa.TileRigth, 8) 
+ end  
+    
 end
 :: .info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjEwOjA0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMDo1NToyNCIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
-IzQyIix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0aW9uPSJwbGF5ZXIubHVhIzgiLHdvcmtzcGFj
-ZV9pbmRleD0xfSx7bG9jYXRpb249InVzZXJfaW50ZXJmYWNlLmx1YSM0MiIsd29ya3NwYWNlX2lu
-ZGV4PTF9LHtsb2NhdGlvbj0ibWFwYS5sdWEjNiIsd29ya3NwYWNlX2luZGV4PTF9LHtsb2NhdGlv
-bj0iZ2Z4LzAuZ2Z4Iix3b3Jrc3BhY2VfaW5kZXg9Mn0se2xvY2F0aW9uPSJtYXAvMC5tYXAiLHdv
-cmtzcGFjZV9pbmRleD0zfSx7bG9jYXRpb249InNmeC8wLnNmeCIsd29ya3NwYWNlX2luZGV4PTR9
-fV1d
+Ni0zMCAwMTo0NzozMyIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
+IzI2Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0aW9uPSJwbGF5ZXIubHVhIzEwIix3b3Jrc3Bh
+Y2VfaW5kZXg9MX0se2xvY2F0aW9uPSJ1c2VyX2ludGVyZmFjZS5sdWEjNjUiLHdvcmtzcGFjZV9p
+bmRleD0xfSx7bG9jYXRpb249Im1hcGEubHVhIzM3Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0
+aW9uPSJnZngvMC5nZngiLHdvcmtzcGFjZV9pbmRleD0yfSx7bG9jYXRpb249Im1hcC8wLm1hcCIs
+d29ya3NwYWNlX2luZGV4PTN9LHtsb2NhdGlvbj0ic2Z4LzAuc2Z4Iix3b3Jrc3BhY2VfaW5kZXg9
+NH19XV0=
 :: [eoc]
