@@ -4,18 +4,18 @@ version 2
 :: gfx/
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMTo0NzozMyIscmV2aXNpb249NTM0XV1sejQA2QAAAFkxAADzFHtbMF09e2JtcD1weHUA
+Ni0zMCAwMjowNTo1MCIscmV2aXNpb249NTY2XV1sejQA2QAAAFkxAADzFHtbMF09e2JtcD1weHUA
 QyAQEATw8CxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sMQDRHDA-EDAsUB5QDGAe0AIAtWAO
 UB5Q-hJQHlAOEwCfDFAeUCwwPjAcXgAcoAjQCPBGCBAI8BwFAE9GCNAIQQAcJP8a0QAfMTIAFPEA
 Ct8aCv4pDxsODd4N-jkNBwBPKgreCkcADg9JAQUPMQD---------------------------------
 ------------------------------8LUG09OH19
 :: gfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMTo0NzozMyJdXQ==
+Ni0zMCAwMjowNTo1MCJdXQ==
 :: map/
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMTo0NzozMyIscmV2aXNpb249NTIzXV1sejQAWQEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
+Ni0zMCAwMjowNTo1MCIscmV2aXNpb249NTU1XV1sejQAWQEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
 KCJpMTYiLDMyAwBfIjAwMDEEABQfMwQAHB8xBAAYHzMEAGEPgAD-jR8xBAAQFzQMAA8EAAkfMwQA
 AQ8gAAwOGAAPBAAjHzEcAAwPIAACDxgACAQEABc0DAAOBAAPSAATHzEgAAgPGAAFHzOYABwOSAAP
 HAAUD_wAGQ9kACQPOABBD4AAyQyIAR80gABcDwQADR80gABsD0gAOQ5cAQ9IACQPAAGkHzHMABQf
@@ -24,19 +24,19 @@ FzQMAA8EAA0fMwQAAQ4gAA8EAEMPgAD--xIPBAANHzMEACQfMQQADfEKIiksaGlkZGVuPWZhbHNl
 LHBhbl94PS02NAoA43k9LTk2LHRpbGVfaD0xCgAQdwoAoHpvb209MC41fX0=
 :: map/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMTo0NzozMyJdXQ==
+Ni0zMCAwMjowNTo1MCJdXQ==
 :: sfx/
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMTo0NzozMyIscmV2aXNpb249NDUyXV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
+Ni0zMCAwMjowNTo1MCIscmV2aXNpb249NDg0XV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
 Ag4AAaABIAKgDgAPEAAN8MoBAgNADw_QBAUGB0AMkAgJCgtADJAPDA8NDw4MQAzw-wEA6-8nqgEQ
 Bg8gEAEgASAB8AACEAIOEAEgDyEgATAPQPDDDygP--DGD-gKD-8PgA-3Dw0B8AkBEAYOMAD-----
 -70f-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: sfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMTo0NzozMyJdXQ==
+Ni0zMCAwMjowNTo1MCJdXQ==
 :: main.lua
---[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-30 01:47:33",revision=568]]
+--[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-30 02:05:50",revision=601]]
 include 'player.lua'
 include 'user_interface.lua'
 include 'mapa.lua'
@@ -84,7 +84,7 @@ function _draw()
   interface:Draw()  
 end
 :: mapa.lua
---[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-06-30 01:47:33",revision=172]]
+--[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-06-30 02:05:50",revision=227]]
 Mapa = {}
 
 function Mapa:New()
@@ -96,10 +96,10 @@ function Mapa:New()
 	  TileDown =- 1,	  
 	  TileLeft =- 1,	  
 	  TileRigth =- 1,	  
-     CanUp=true,
-     CanDown=true,
-     CanLeft=true,
-     CanRigth=true	  
+     CanUp = true,
+     CanDown = true,
+     CanLeft = true,
+     CanRigth = true	  
 	}
 	setmetatable(obj, self)
 	self.__index = self
@@ -118,20 +118,20 @@ function Mapa:Calc()
  self.TileCentralIndex = mget(self.TileCentralX, self.TileCentralY) or -1
  
  -- buscar os tiles que estao do lado do atual
- self.TileUp    = mget(self.TileCentralX     , self.TileCentralY - 1) or -1
- self.TileDown  = mget(self.TileCentralX     , self.TileCentralY + 1) or -1
- self.TileLeft  = mget(self.TileCentralX - 1 , self.TileCentralY    ) or -1
- self.TileRigth = mget(self.TileCentralX + 1 , self.TileCentralY    ) or -1
+ self.TileUp    = mget(self.TileCentralX         , flr((player.y + 15) / 16) - 1) or -1
+ self.TileDown  = mget(self.TileCentralX         , flr((player.y) / 16) + 1) or -1
+ self.TileLeft  = mget(flr((player.x - 1) / 16)     , self.TileCentralY    ) or -1
+ self.TileRigth = mget(flr((player.x + 1) / 16) + 1 , self.TileCentralY    ) or -1
  
  -- verificar se podemso movimentar para os lados
- self.CanUp    = fget(self.TileUp,    0)
- self.CanDown  = fget(self.TileDown,  0)
- self.CanLeft  = fget(self.TileLeft,  0)
+ self.CanUp    = fget(self.TileUp,    0)  
+ self.CanDown  = fget(self.TileDown,  0)  
+ self.CanLeft  = fget(self.TileLeft,  0)  
  self.CanRigth = fget(self.TileRigth, 0)
     
 end
 :: player.lua
---[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-30 01:47:33",revision=445]]
+--[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-30 02:05:50",revision=478]]
 -- Definindo a "classe" Player
 Player={}
 
@@ -154,7 +154,7 @@ function Player:Draw()
   camera(self.x - 120, self.y - 120)
 end
 :: user_interface.lua
---[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-30 01:47:33",revision=565]]
+--[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-30 02:05:50",revision=598]]
 include 'player.lua'
 include 'mapa.lua'
 
@@ -225,10 +225,10 @@ function UserInterface:Draw()
 end
 :: .info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjEwOjA0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMTo0NzozMyIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
+Ni0zMCAwMjowNTo1MCIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
 IzI2Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0aW9uPSJwbGF5ZXIubHVhIzEwIix3b3Jrc3Bh
 Y2VfaW5kZXg9MX0se2xvY2F0aW9uPSJ1c2VyX2ludGVyZmFjZS5sdWEjNjUiLHdvcmtzcGFjZV9p
-bmRleD0xfSx7bG9jYXRpb249Im1hcGEubHVhIzM3Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0
+bmRleD0xfSx7bG9jYXRpb249Im1hcGEubHVhIzM1Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0
 aW9uPSJnZngvMC5nZngiLHdvcmtzcGFjZV9pbmRleD0yfSx7bG9jYXRpb249Im1hcC8wLm1hcCIs
 d29ya3NwYWNlX2luZGV4PTN9LHtsb2NhdGlvbj0ic2Z4LzAuc2Z4Iix3b3Jrc3BhY2VfaW5kZXg9
 NH19XV0=
