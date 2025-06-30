@@ -1,0 +1,200 @@
+picotron cartridge // www.picotron.net
+version 2
+
+:: gfx/
+:: gfx/0.gfx
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
+Ni0zMCAwMDo1NToyNCIscmV2aXNpb249NDQxXV1sejQAuwAAAEMxAADzFHtbMF09e2JtcD1weHUA
+QyAQEATw8CxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sMQDRHDA-EDAsUB5QDGAe0AIAtWAO
+UB5Q-hJQHlAOEwCTDFAeUCwwPjAcXgAfMV4AFKAI0AjwRggQCPAcBQBPRgjQCJ8AHC--GtEAHR-w
+MQD---------------------------------------------------------------9FUG09OH19
+:: gfx/.info.pod
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
+Ni0zMCAwMDo1NToyNCJdXQ==
+:: map/
+:: map/0.map
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
+Ni0zMCAwMDo1NToyNCIscmV2aXNpb249NDMzXV1sejQA9wAAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
+KCJpMTYiLDMyAwBfIjAwMDEEABQfMwQAHB8xBAAYHzMEAGEPgAD-jR8xBAA4HzMEAAEPIAAMDhgA
+DwQAIx8xHAAMDyAAAg4YAA8EACYfMRwADA8gAAIOGAAPBAAmHzEcAEAOBAAPSAAkD4AA--------
+9h8xOAAJDwQAMB8xHAAMHzEcAAUPBAA4HzMEAAEOIAAPBABDD4AA--8SDwQADR8zBAAkHzEEAA3x
+CiIpLGhpZGRlbj1mYWxzZSxwYW5feD0tNjQKAON5PS05Nix0aWxlX2g9MQoAEHcKAKB6b29tPTAu
+NX19
+:: map/.info.pod
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
+Ni0zMCAwMDo1NToyNCJdXQ==
+:: sfx/
+:: sfx/0.sfx
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
+Ni0zMCAwMDo1NToyNCIscmV2aXNpb249MzY2XV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
+Ag4AAaABIAKgDgAPEAAN8MoBAgNADw_QBAUGB0AMkAgJCgtADJAPDA8NDw4MQAzw-wEA6-8nqgEQ
+Bg8gEAEgASAB8AACEAIOEAEgDyEgATAPQPDDDygP--DGD-gKD-8PgA-3Dw0B8AkBEAYOMAD-----
+-70f-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
+:: sfx/.info.pod
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
+Ni0zMCAwMDo1NToyNCJdXQ==
+:: main.lua
+--[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-30 00:55:24",revision=468]]
+include 'player.lua'
+include 'user_interface.lua'
+include 'mapa.lua'
+
+function _init()
+  player = Player:New()
+  interface = UserInterface:New()
+  mapa = Mapa:New()
+end
+
+function _update()
+  player:CheckMove()
+  if btn(0) then
+    if player.CanDown then
+	    player.x -= player.Speed
+	    player.IsFlipped = true
+    end
+  end
+  if btn(1) then
+    if player.CanUp then
+	    player.x += player.Speed
+	    player.IsFlipped = false
+    end
+  end
+  if btn(2) then
+    if player.CanLeft then
+    	player.y -= player.Speed
+    end
+  end
+  if btn(3) then
+    if player.CanRigth then
+    	player.y += player.Speed
+    end
+  end
+end
+
+function _draw()
+  -- limpar a tela
+  cls() 
+  -- desenhar mapa  
+  mapa:Draw()
+  mapa:Calc()
+  -- desenhar jogador
+  player:Draw()
+  -- desenhar gui
+  interface:Draw()  
+end
+:: mapa.lua
+--[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-06-30 00:55:24",revision=54]]
+Mapa = {}
+
+function Mapa:New()
+	local obj = {
+	  TileCentralX = 0,
+	  TileCentralY = 0,
+	  TileCentralIndex =- 1
+	}
+	setmetatable(obj, self)
+	self.__index = self
+	return obj
+	
+end
+
+function Mapa:Draw()
+  map()
+end
+
+function Mapa:Calc()
+ self.TileCentralX = flr((player.x + 8)/16)
+ self.TileCentralY = flr((player.y + 8)/16)
+ self.TileCentralIndex = mget(self.TileCentralX, self.TileCentralY) or -1
+end
+:: player.lua
+--[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-30 00:55:24",revision=353]]
+-- Definindo a "classe" Player
+Player={}
+
+function Player:New(x, y)
+	local obj = {
+		x = x or 120,
+		y = y or 120,
+		Speed=1,
+      SpriteId=2,
+      IsFlipped=false,
+      CanUp=true,
+      CanDown=true,
+      CanLeft=true,
+      CanRigth=true
+	}
+	setmetatable(obj, self)
+	self.__index = self
+	return obj
+end
+
+-- Desenhando em tela
+function Player:Draw()
+  spr(self.SpriteId, self.x, self.y, self.IsFlipped)
+  camera(self.x - 120, self.y - 120)
+end
+
+function Player:CheckMove()
+ -- pegar a flag dos sprites ao redor com fget
+ self.CanUp=true
+ self.CanDown=true
+ self.CanLeft=true
+ self.CanRigth=true 
+end
+:: user_interface.lua
+--[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-30 00:55:24",revision=449]]
+include 'player.lua'
+include 'mapa.lua'
+
+UserInterface = {
+  BackgroundColor=1,
+  FontColor=7,  
+}
+
+function UserInterface:New()
+	local obj = {
+	
+	}
+	setmetatable(obj, self)
+	self.__index = self
+	return obj
+	
+end
+
+function UserInterface:Draw()
+  --
+  rectfill(
+    player.x + 240, -- largura
+    player.y - 100, -- altura
+    player.x + 350, -- largura
+    player.y + 140, -- altura
+    self.BackgroundColor
+  )
+
+  -- borda
+  rect(
+    player.x - 110, 
+    player.y - 100, 
+    player.x + 230, 
+    player.y + 140, 
+    self.BackgroundColor
+  )
+
+ print("Posicao: ".. player.x .. "|".. player.y, player.x + 245, player.y - 95, self.FontColor)
+ print("Sprite: ".. mapa.TileCentralX .. "|" .. mapa.TileCentralY, self.FontColor)
+
+ print("mget: ".. mapa.TileCentralIndex, self.FontColor)
+ spr(mapa.TileCentralIndex, player.x + 245, player.y - 60) 
+  
+end
+:: .info.pod
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjEwOjA0Iixtb2RpZmllZD0iMjAyNS0w
+Ni0zMCAwMDo1NToyNCIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
+IzQyIix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0aW9uPSJwbGF5ZXIubHVhIzgiLHdvcmtzcGFj
+ZV9pbmRleD0xfSx7bG9jYXRpb249InVzZXJfaW50ZXJmYWNlLmx1YSM0MiIsd29ya3NwYWNlX2lu
+ZGV4PTF9LHtsb2NhdGlvbj0ibWFwYS5sdWEjNiIsd29ya3NwYWNlX2luZGV4PTF9LHtsb2NhdGlv
+bj0iZ2Z4LzAuZ2Z4Iix3b3Jrc3BhY2VfaW5kZXg9Mn0se2xvY2F0aW9uPSJtYXAvMC5tYXAiLHdv
+cmtzcGFjZV9pbmRleD0zfSx7bG9jYXRpb249InNmeC8wLnNmeCIsd29ya3NwYWNlX2luZGV4PTR9
+fV1d
+:: [eoc]
