@@ -4,18 +4,20 @@ version 2
 :: gfx/
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMjowNTo1MCIscmV2aXNpb249NTY2XV1sejQA2QAAAFkxAADzFHtbMF09e2JtcD1weHUA
-QyAQEATw8CxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sMQDRHDA-EDAsUB5QDGAe0AIAtWAO
-UB5Q-hJQHlAOEwCfDFAeUCwwPjAcXgAcoAjQCPBGCBAI8BwFAE9GCNAIQQAcJP8a0QAfMTIAFPEA
-Ct8aCv4pDxsODd4N-jkNBwBPKgreCkcADg9JAQUPMQD---------------------------------
-------------------------------8LUG09OH19
+Ni0zMCAwMjoyMTo1NiIscmV2aXNpb249NTk0XV1sejQARAEAAMExAADzFHtbMF09e2JtcD1weHUA
+QyAQEATw8CxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sMQDwMxwvEQA-EAAvESwjIB8QICMM
+DxETMB8QMBMfEQNAHxBAAx8RQAMfEANADxFAEx8QE0AOIBMPHB4NEyB_Hd4dfiATDQwAUA5AEx4T
+IwD-DwMeA0AbA0AeQAMbEzAeMBMLDCMgHiAjLCsAPgArHJwAHPQTCA8fsA4IDtAO8AwPGeAN4A2A
+CBAIEA0O0A0ODw-ADQ4MYBAAAB0Ar-ADDtAOCA6wDghnABwk-xo1AR8xMgAU8gQK3xoK-hoJ3g8b
+Dg3eDf4qCd4NCQA-Ct4KSwAOD7EBBQ8xAP------------------------------------------
+---------------------wtQbT04fX0=
 :: gfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMjowNTo1MCJdXQ==
+Ni0zMCAwMjoyMTo1NyJdXQ==
 :: map/
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMjowNTo1MCIscmV2aXNpb249NTU1XV1sejQAWQEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
+Ni0zMCAwMjoyMTo1NiIscmV2aXNpb249NTczXV1sejQAWQEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
 KCJpMTYiLDMyAwBfIjAwMDEEABQfMwQAHB8xBAAYHzMEAGEPgAD-jR8xBAAQFzQMAA8EAAkfMwQA
 AQ8gAAwOGAAPBAAjHzEcAAwPIAACDxgACAQEABc0DAAOBAAPSAATHzEgAAgPGAAFHzOYABwOSAAP
 HAAUD_wAGQ9kACQPOABBD4AAyQyIAR80gABcDwQADR80gABsD0gAOQ5cAQ9IACQPAAGkHzHMABQf
@@ -24,19 +26,19 @@ FzQMAA8EAA0fMwQAAQ4gAA8EAEMPgAD--xIPBAANHzMEACQfMQQADfEKIiksaGlkZGVuPWZhbHNl
 LHBhbl94PS02NAoA43k9LTk2LHRpbGVfaD0xCgAQdwoAoHpvb209MC41fX0=
 :: map/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMjowNTo1MCJdXQ==
+Ni0zMCAwMjoyMTo1NyJdXQ==
 :: sfx/
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMjowNTo1MCIscmV2aXNpb249NDg0XV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
+Ni0zMCAwMjoyMTo1NiIscmV2aXNpb249NTAyXV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
 Ag4AAaABIAKgDgAPEAAN8MoBAgNADw_QBAUGB0AMkAgJCgtADJAPDA8NDw4MQAzw-wEA6-8nqgEQ
 Bg8gEAEgASAB8AACEAIOEAEgDyEgATAPQPDDDygP--DGD-gKD-8PgA-3Dw0B8AkBEAYOMAD-----
 -70f-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: sfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMjowNTo1MCJdXQ==
+Ni0zMCAwMjoyMTo1NyJdXQ==
 :: main.lua
---[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-30 02:05:50",revision=601]]
+--[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-06-30 02:21:56",revision=622]]
 include 'player.lua'
 include 'user_interface.lua'
 include 'mapa.lua'
@@ -84,7 +86,7 @@ function _draw()
   interface:Draw()  
 end
 :: mapa.lua
---[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-06-30 02:05:50",revision=227]]
+--[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-06-30 02:21:56",revision=254]]
 Mapa = {}
 
 function Mapa:New()
@@ -121,7 +123,7 @@ function Mapa:Calc()
  self.TileUp    = mget(self.TileCentralX         , flr((player.y + 15) / 16) - 1) or -1
  self.TileDown  = mget(self.TileCentralX         , flr((player.y) / 16) + 1) or -1
  self.TileLeft  = mget(flr((player.x - 1) / 16)     , self.TileCentralY    ) or -1
- self.TileRigth = mget(flr((player.x + 1) / 16) + 1 , self.TileCentralY    ) or -1
+ self.TileRigth = mget(flr((player.x) / 16) + 1 , self.TileCentralY    ) or -1
  
  -- verificar se podemso movimentar para os lados
  self.CanUp    = fget(self.TileUp,    0)  
@@ -131,7 +133,7 @@ function Mapa:Calc()
     
 end
 :: player.lua
---[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-30 02:05:50",revision=478]]
+--[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-06-30 02:21:56",revision=497]]
 -- Definindo a "classe" Player
 Player={}
 
@@ -154,7 +156,7 @@ function Player:Draw()
   camera(self.x - 120, self.y - 120)
 end
 :: user_interface.lua
---[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-30 02:05:50",revision=598]]
+--[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-06-30 02:21:56",revision=617]]
 include 'player.lua'
 include 'mapa.lua'
 
@@ -225,10 +227,10 @@ function UserInterface:Draw()
 end
 :: .info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjEwOjA0Iixtb2RpZmllZD0iMjAyNS0w
-Ni0zMCAwMjowNTo1MCIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
+Ni0zMCAwMjoyMTo1NyIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
 IzI2Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0aW9uPSJwbGF5ZXIubHVhIzEwIix3b3Jrc3Bh
 Y2VfaW5kZXg9MX0se2xvY2F0aW9uPSJ1c2VyX2ludGVyZmFjZS5sdWEjNjUiLHdvcmtzcGFjZV9p
-bmRleD0xfSx7bG9jYXRpb249Im1hcGEubHVhIzM1Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0
+bmRleD0xfSx7bG9jYXRpb249Im1hcGEubHVhIzM5Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0
 aW9uPSJnZngvMC5nZngiLHdvcmtzcGFjZV9pbmRleD0yfSx7bG9jYXRpb249Im1hcC8wLm1hcCIs
 d29ya3NwYWNlX2luZGV4PTN9LHtsb2NhdGlvbj0ic2Z4LzAuc2Z4Iix3b3Jrc3BhY2VfaW5kZXg9
 NH19XV0=
