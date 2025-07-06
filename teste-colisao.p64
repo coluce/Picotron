@@ -4,7 +4,7 @@ version 2
 :: gfx/
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNCAwMToxNDoxNiIscmV2aXNpb249ODU4XV1sejQAnQEAALAyAADzFHtbMF09e2JtcD1weHUA
+Ny0wNiAxODoxNjo1NiIscmV2aXNpb249ODYxXV1sejQAnQEAALAyAADzFHtbMF09e2JtcD1weHUA
 QyAQEATw8CxmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sMQDwMxwvEQA-EAAvESwjIB8QICMM
 DxETMB8QMBMfEQNAHxBAAx8RQAMfEANADxFAEx8QE0AOIBMPHB4NEyB_Hd4dfiATDQwAUA5AEx4T
 IwD-DwMeA0AbA0AeQAMbEzAeMBMLDCMgHiAjLCsAPgArHJwAHPABCA8fsA4IDtAO8DYIEAjwHAUA
@@ -14,11 +14,11 @@ TwAkL-DwMQCvDxMBAEFwCPAAAwAfC2cBOI8CCNAI0AjwBVMALhIESQAfAw0COBMK8QAfgFQALi-w
 8DEA------------------------------------------------------------AFBtPTh9fQ==
 :: gfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNCAwMToxNDoxNiJdXQ==
+Ny0wNiAxODoxNjo1NiJdXQ==
 :: map/
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNCAwMToxNDoxNiIscmV2aXNpb249ODA3XV1sejQAWQEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
+Ny0wNiAxODoxNjo1NiIscmV2aXNpb249ODEwXV1sejQAWQEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
 KCJpMTYiLDMyAwBfIjAwMDEEABQfMwQAHB8xBAAYHzMEAGEPgAD-jR8xBAAQFzQMAA8EAAkfMwQA
 AQ8gAAwOGAAPBAAjHzEcAAwPIAACDxgACAQEABc0DAAOBAAPSAATHzEgAAgPGAAFHzOYABwOSAAP
 HAAUD_wAGQ9kACQPOABBD4AAyQyIAR80gABcDwQADR80gABsD0gAOQ5cAQ9IACQPAAGkHzHMABQf
@@ -27,19 +27,19 @@ FzQMAA8EAA0fMwQAAQ4gAA8EAEMPgAD--xIPBAANHzMEACQfMQQADfEKIiksaGlkZGVuPWZhbHNl
 LHBhbl94PS02NAoA43k9LTk2LHRpbGVfaD0xCgAQdwoAoHpvb209MC41fX0=
 :: map/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNCAwMToxNDoxNiJdXQ==
+Ny0wNiAxODoxNjo1NiJdXQ==
 :: sfx/
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNCAwMToxNDoxNiIscmV2aXNpb249NzMxXV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
+Ny0wNiAxODoxNjo1NiIscmV2aXNpb249NzM0XV1sejQAoAAAAAsKAAD-MHB4dQADKAAABAAED0AQ
 Ag4AAaABIAKgDgAPEAAN8MoBAgNADw_QBAUGB0AMkAgJCgtADJAPDA8NDw4MQAzw-wEA6-8nqgEQ
 Bg8gEAEgASAB8AACEAIOEAEgDyEgATAPQPDDDygP--DGD-gKD-8PgA-3Dw0B8AkBEAYOMAD-----
 -70f-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: sfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNCAwMToxNDoxNiJdXQ==
+Ny0wNiAxODoxNjo1NiJdXQ==
 :: main.lua
---[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-07-04 01:14:16",revision=915]]
+--[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-07-06 18:16:56",revision=919]]
 include 'player.lua'
 include 'user_interface.lua'
 include 'mapa.lua'
@@ -106,9 +106,9 @@ function _draw()
   interface:Draw()  
 end
 :: mapa.lua
---[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-07-04 01:14:16",revision=615]]
+--[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-07-06 18:16:56",revision=620]]
 Mapa = {}
-
+-- teste
 function Mapa:New()
 	local obj = {
 	  TileCentralX = 0,
@@ -178,7 +178,7 @@ function Mapa:InCollision(PosX, PosY)
          
 end
 :: player.lua
---[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-07-04 01:14:16",revision=783]]
+--[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-07-06 18:16:56",revision=787]]
 -- Definindo a "classe" Player
 Player={}
 
@@ -249,7 +249,7 @@ function Player:Draw()
 
 end
 :: user_interface.lua
---[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-07-04 01:14:16",revision=891]]
+--[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-07-06 18:16:56",revision=895]]
 include 'player.lua'
 include 'mapa.lua'
 
@@ -353,11 +353,11 @@ function UserInterface:Draw()
 end
 :: .info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjEwOjA0Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNCAwMToxNDoxNiIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
-IzQ2Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0aW9uPSJwbGF5ZXIubHVhIzY0Iix3b3Jrc3Bh
-Y2VfaW5kZXg9MX0se2xvY2F0aW9uPSJ1c2VyX2ludGVyZmFjZS5sdWEjMSIsd29ya3NwYWNlX2lu
-ZGV4PTF9LHtsb2NhdGlvbj0ibWFwYS5sdWEjNDciLHdvcmtzcGFjZV9pbmRleD0xfSx7bG9jYXRp
-b249ImdmeC8wLmdmeCIsd29ya3NwYWNlX2luZGV4PTJ9LHtsb2NhdGlvbj0ibWFwLzAubWFwIix3
-b3Jrc3BhY2VfaW5kZXg9M30se2xvY2F0aW9uPSJzZngvMC5zZngiLHdvcmtzcGFjZV9pbmRleD00
-fX1dXQ==
+Ny0wNiAxODoxNjo1NiIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
+IzEiLHdvcmtzcGFjZV9pbmRleD0xfSx7bG9jYXRpb249InBsYXllci5sdWEjMSIsd29ya3NwYWNl
+X2luZGV4PTF9LHtsb2NhdGlvbj0idXNlcl9pbnRlcmZhY2UubHVhIzEiLHdvcmtzcGFjZV9pbmRl
+eD0xfSx7bG9jYXRpb249Im1hcGEubHVhIzIiLHdvcmtzcGFjZV9pbmRleD0xfSx7bG9jYXRpb249
+ImdmeC8wLmdmeCIsd29ya3NwYWNlX2luZGV4PTJ9LHtsb2NhdGlvbj0ibWFwLzAubWFwIix3b3Jr
+c3BhY2VfaW5kZXg9M30se2xvY2F0aW9uPSJzZngvMC5zZngiLHdvcmtzcGFjZV9pbmRleD00fX1d
+XQ==
 :: [eoc]
