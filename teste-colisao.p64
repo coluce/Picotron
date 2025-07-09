@@ -14,20 +14,21 @@ TwAkL-DwMQCvDxMBAEFwCPAAAwAfC2cBOI8CCNAI0AjwBVMALhIESQAfAw0COBMK8QAfgFQALi-w
 8DEA------------------------------------------------------------AFBtPTh9fQ==
 :: gfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNiAxODoxNjo1NiJdXQ==
+Ny0wOSAyMjowMzowNCJdXQ==
 :: map/
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNiAxODoxNjo1NiIscmV2aXNpb249ODEwXV1sejQAWQEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
+Ny0wOSAyMTo1MzozMiIscmV2aXNpb249ODExXV1sejQAcwEAAF4QAADwCHt7Ym1wPXVzZXJkYXRh
 KCJpMTYiLDMyAwBfIjAwMDEEABQfMwQAHB8xBAAYHzMEAGEPgAD-jR8xBAAQFzQMAA8EAAkfMwQA
-AQ8gAAwOGAAPBAAjHzEcAAwPIAACDxgACAQEABc0DAAOBAAPSAATHzEgAAgPGAAFHzOYABwOSAAP
-HAAUD_wAGQ9kACQPOABBD4AAyQyIAR80gABcDwQADR80gABsD0gAOQ5cAQ9IACQPAAGkHzHMABQf
-NIAAWA8EAAIPgAB8HzSAAGwfM4AAwA5kAg_AAFsfM4AASB8xOAAJDwQAMB8xHAAMHzEcAAwPBAAF
-FzQMAA8EAA0fMwQAAQ4gAA8EAEMPgAD--xIPBAANHzMEACQfMQQADfEKIiksaGlkZGVuPWZhbHNl
-LHBhbl94PS02NAoA43k9LTk2LHRpbGVfaD0xCgAQdwoAoHpvb209MC41fX0=
+AQ8gAAwOGAAPBAAjHzEcAAwPIAACDxgACAQEABc0DAAOBAAPSAATHzEgAAUPGAAMDxwABQ6YAA4s
+AA8cABYPVAAkHzMsACgOOAAPVAAUDywANA84ABEeMRwADwQABw4sAA84ACofNBAADA_AAE0PBAAN
+HzSAAGwPSAA5DlwBD0gAJA8AAaQfMcwAFB80gABYDwQAAg_AAHwfNIAAbB8zgADADmQCD4AAWx8z
+gABIHzE4AAkPBAAwHzEcAAwfMRwADA8EAAUXNAwADwQADR8zBAABDiAADwQAQw_AAP--Eg8EAA0f
+MwQAJB8xBAAN8QoiKSxoaWRkZW49ZmFsc2UscGFuX3g9LTY0CgDjeT0tOTYsdGlsZV9oPTEKABB3
+CgCgem9vbT0wLjV9fQ==
 :: map/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNiAxODoxNjo1NiJdXQ==
+Ny0wOSAyMjowMzowNCJdXQ==
 :: sfx/
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIyOjA4OjI0Iixtb2RpZmllZD0iMjAyNS0w
@@ -37,9 +38,9 @@ Bg8gEAEgASAB8AACEAIOEAEgDyEgATAPQPDDDygP--DGD-gKD-8PgA-3Dw0B8AkBEAYOMAD-----
 -70f-wEArM-ID0AADxBA--_w8P8BAP-qUP----8p
 :: sfx/.info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjI0OjI1Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNiAxODoxNjo1NiJdXQ==
+Ny0wOSAyMjowMzowNCJdXQ==
 :: main.lua
---[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-07-06 18:16:56",revision=919]]
+--[[pod_format="raw",created="2025-06-27 22:08:24",modified="2025-07-09 22:03:04",revision=929]]
 include 'player.lua'
 include 'user_interface.lua'
 include 'mapa.lua'
@@ -51,8 +52,8 @@ function _init()
 end
 
 function _update()
-  local vPosX = player.x
-  local vPosY = player.y
+  local LPosX = player.x
+  local LPosY = player.y
   
   player.DirectionUp = false 
   player.DirectionDown = false 
@@ -60,37 +61,45 @@ function _update()
   player.DirectionRigth = false 
 
   if btn(0) then -- esquerda
-    vPosX -= player.Speed
+    LPosX -= player.Speed
 	 player.DirectionLeft = true
 	 player.DirectionLast = 0
   end
   
   if btn(1) then -- direita
-    vPosX += player.Speed
+    LPosX += player.Speed
 	 player.DirectionRigth = true
 	 player.DirectionLast = 1	 
   end
   
   if btn(2) then -- cima
-    vPosY -= player.Speed
+    LPosY -= player.Speed
 	 player.DirectionUp = true
 	 player.DirectionLast = 2	 
   end
   
   if btn(3) then -- baixo
-    vPosY += player.Speed
+    LPosY += player.Speed
 	 player.DirectionDown = true
 	 player.DirectionLast = 3	 
   end
   
-  mapa:InCollision(vPosX, vPosY) 
+  mapa:InCollision(LPosX, LPosY) 
    
-  if mapa.CanUp or mapa.CanDown then
-    player.x = vPosX
+  if 
+    mapa.CanUp or mapa.CanDown 
+    --(mapa.CanUp and DirectionUp) or 
+    --(mapa.CanDown and DirectionDown)  
+  then
+    player.x = LPosX
   end
  
-  if mapa.CanLeft or mapa.CanRigth then 
-    player.y = vPosY     
+  if 
+    mapa.CanLeft or mapa.CanRigth
+    --(mapa.CanLeft and player.DirectionLeft) or 
+    --(mapa.CanRigth and player.DirectionRigth)  
+  then 
+    player.y = LPosY     
   end  
  
 end
@@ -106,7 +115,7 @@ function _draw()
   interface:Draw()  
 end
 :: mapa.lua
---[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-07-06 18:16:56",revision=620]]
+--[[pod_format="raw",created="2025-06-30 00:35:37",modified="2025-07-09 21:59:40",revision=633]]
 Mapa = {}
 -- teste
 function Mapa:New()
@@ -138,31 +147,25 @@ function Mapa:Draw()
   map()
 end
 
-function Mapa:InCollision(PosX, PosY)
+function Mapa:InCollision(APosX, APosY)
 
  -- buscar o tile atual
- self.TileCentralX = flr(PosX/16)
- self.TileCentralY = flr(PosY/16)
+ self.TileCentralX = flr(APosX/16)
+ self.TileCentralY = flr(APosY/16)
  self.TileCentralIndex = mget(self.TileCentralX, self.TileCentralY) or -1
  
  -- buscar os tiles que estao do lado do atual
  -- acima
- self.TileUp = mget(flr(PosX/16), flr(PosY / 16)) or -1
+ self.TileUp = mget(flr(APosX/16), flr(APosY / 16)) or -1
  -- nas laterais
- self.TileLeft = mget(flr(PosX/16), flr(PosY/16)) or -1
-
- -- direita
- if self.Direction == 1 then
-  self.TileRigth = mget(flr((PosX)/16) + 1, flr((PosY + 16)/16)) or -1
- else
-  self.TileRigth = mget(flr(PosX/16) + 1, flr(PosY/16)) or -1
- end   
+ self.TileLeft  = mget(flr(APosX/16),            flr(APosY/16))        or -1
+ self.TileRigth = mget(flr((APosX+1)/16) + 1, flr((APosY)/16)) or -1
 
  -- baixo
  if self.Direction == 3 then
-  self.TileDown = mget(flr(PosX/16), flr((PosY + 16)/16) + 1) or -1
+  self.TileDown = mget(flr(APosX/16), flr((APosY + 16)/16) + 1) or -1
  else
-  self.TileDown = mget(flr(PosX/16), flr(PosY/16) + 1) or -1 
+  self.TileDown = mget(flr(APosX/16), flr(APosY/16) + 1) or -1 
  end
  
  -- verificar se pode movimentar para os lados
@@ -178,7 +181,7 @@ function Mapa:InCollision(PosX, PosY)
          
 end
 :: player.lua
---[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-07-06 18:16:56",revision=787]]
+--[[pod_format="raw",created="2025-06-28 16:17:54",modified="2025-07-09 21:24:47",revision=788]]
 -- Definindo a "classe" Player
 Player={}
 
@@ -249,7 +252,7 @@ function Player:Draw()
 
 end
 :: user_interface.lua
---[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-07-06 18:16:56",revision=895]]
+--[[pod_format="raw",created="2025-06-28 16:38:30",modified="2025-07-09 22:00:46",revision=903]]
 include 'player.lua'
 include 'mapa.lua'
 
@@ -301,31 +304,35 @@ function UserInterface:Draw()
  else
    print("up " .. mapa.TileUp, 8) 
  end
+ spr(mapa.TileUp, player.x + 325, player.y - 40)
  
  if mapa.CanDown then
    print("down " .. mapa.TileDown, 11)
  else
    print("down " .. mapa.TileDown, 8) 
  end
+ spr(mapa.TileDown, player.x + 325, player.y - 30)
 
  if mapa.CanLeft then
    print("left " .. mapa.TileLeft, 11)
  else
    print("left " .. mapa.TileLeft, 8) 
  end 
+ spr(mapa.TileLeft, player.x + 325, player.y - 20)
 
  if mapa.CanRigth then
    print("rigth " .. mapa.TileRigth, 11)
  else
    print("rigth " .. mapa.TileRigth, 8) 
  end  
+ spr(mapa.TileRigth, player.x + 325, player.y - 10)
     
  print("", 12)
 
  if mapa.IsColliding then
-   print("collidint", 8)
+   print("hit", 8)
  else
-   print("collidint", 12) 
+   print("hit", 12) 
  end
 
  print("")
@@ -353,11 +360,11 @@ function UserInterface:Draw()
 end
 :: .info.pod
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA2LTI3IDIzOjEwOjA0Iixtb2RpZmllZD0iMjAyNS0w
-Ny0wNiAxODoxNjo1NiIscnVudGltZT0xOCx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
-IzEiLHdvcmtzcGFjZV9pbmRleD0xfSx7bG9jYXRpb249InBsYXllci5sdWEjMSIsd29ya3NwYWNl
-X2luZGV4PTF9LHtsb2NhdGlvbj0idXNlcl9pbnRlcmZhY2UubHVhIzEiLHdvcmtzcGFjZV9pbmRl
-eD0xfSx7bG9jYXRpb249Im1hcGEubHVhIzIiLHdvcmtzcGFjZV9pbmRleD0xfSx7bG9jYXRpb249
-ImdmeC8wLmdmeCIsd29ya3NwYWNlX2luZGV4PTJ9LHtsb2NhdGlvbj0ibWFwLzAubWFwIix3b3Jr
-c3BhY2VfaW5kZXg9M30se2xvY2F0aW9uPSJzZngvMC5zZngiLHdvcmtzcGFjZV9pbmRleD00fX1d
-XQ==
+Ny0wOSAyMjowMzowNCIscnVudGltZT0xOSx3b3Jrc3BhY2VzPXt7bG9jYXRpb249Im1haW4ubHVh
+IzU3Iix3b3Jrc3BhY2VfaW5kZXg9MX0se2xvY2F0aW9uPSJwbGF5ZXIubHVhIzEiLHdvcmtzcGFj
+ZV9pbmRleD0xfSx7bG9jYXRpb249InVzZXJfaW50ZXJmYWNlLmx1YSM1MiIsd29ya3NwYWNlX2lu
+ZGV4PTF9LHtsb2NhdGlvbj0ibWFwYS5sdWEjNDQiLHdvcmtzcGFjZV9pbmRleD0xfSx7bG9jYXRp
+b249ImdmeC8wLmdmeCIsd29ya3NwYWNlX2luZGV4PTJ9LHtsb2NhdGlvbj0ibWFwLzAubWFwIix3
+b3Jrc3BhY2VfaW5kZXg9M30se2xvY2F0aW9uPSJzZngvMC5zZngiLHdvcmtzcGFjZV9pbmRleD00
+fX1dXQ==
 :: [eoc]
