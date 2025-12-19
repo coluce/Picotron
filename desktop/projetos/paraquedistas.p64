@@ -3,7 +3,6 @@ version 2
 
 :: gfx/
 :: map/
-:: projetos/
 :: sfx/
 :: main.lua
 --[[pod_format="raw",created="2025-12-14 18:20:21",modified="2025-12-17 03:26:02",revision=76]]
@@ -84,8 +83,6 @@ b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNS0x
 Mi0xNiAwNDowODo1MyIscmV2aXNpb249OF1dbHo0AE8AAABTAAAA8Rx7e2JtcD1weHUATIAgIAD-
 AAD---8DLGhpZGRlbj1mYWxzZSxwYW5feD0wCADSeT0wLHRpbGVfaD0xNgoAEHcKALB6b29tPTAu
 MjV9fQ==
-:: projetos/.info.pod
---[[pod,created="2025-12-14 18:12:43",modified="2025-12-17 03:26:02"]]
 :: sfx/.info.pod
 --[[pod,created="2025-11-13 21:07:43",modified="2025-12-17 03:26:02"]]
 :: sfx/0.sfx
