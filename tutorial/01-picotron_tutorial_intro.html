@@ -1,0 +1,326 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-mono, monospace); }
+.wrap { padding: 1.5rem 0; max-width: 680px; }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.04em; }
+.badge-purple { background: #EEEDFE; color: #3C3489; }
+.badge-teal { background: #E1F5EE; color: #0F6E56; }
+.badge-amber { background: #FAEEDA; color: #854F0B; }
+.badge-coral { background: #FAECE7; color: #993C1D; }
+.step-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.step-btn { background: transparent; border: 0.5px solid var(--border-strong, #888); border-radius: 6px; padding: 5px 12px; font-size: 12px; font-family: var(--font-mono, monospace); cursor: pointer; color: var(--text-secondary, #555); transition: all 0.15s; }
+.step-btn.active { background: var(--bg-accent, #E6F1FB); border-color: var(--border-accent, #185FA5); color: var(--text-accent, #185FA5); font-weight: 500; }
+.step-btn:hover:not(.active) { background: var(--surface-1, #f5f5f5); }
+.section { display: none; }
+.section.active { display: block; }
+h2 { font-size: 17px; font-weight: 500; color: var(--text-primary); margin-bottom: 0.5rem; font-family: var(--font-sans, sans-serif); }
+p { font-size: 14px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 0.9rem; font-family: var(--font-sans, sans-serif); }
+.code-block { background: var(--surface-1, #f5f4f0); border: 0.5px solid var(--border, #ccc); border-radius: 8px; padding: 1rem 1.25rem; margin: 0.8rem 0 1rem; overflow-x: auto; }
+.code-block pre { font-size: 13px; line-height: 1.7; color: var(--text-primary); font-family: var(--font-mono, monospace); white-space: pre; }
+.kw { color: #534AB7; font-weight: 500; }
+.fn { color: #0F6E56; }
+.cm { color: #888; font-style: italic; }
+.str { color: #993C1D; }
+.num { color: #854F0B; }
+.tip { border-left: 3px solid var(--border-accent, #185FA5); background: var(--bg-accent, #E6F1FB); border-radius: 0 6px 6px 0; padding: 0.7rem 1rem; margin: 0.8rem 0; font-size: 13px; color: var(--text-primary); font-family: var(--font-sans, sans-serif); line-height: 1.55; }
+.warn { border-left: 3px solid #EF9F27; background: #FAEEDA; border-radius: 0 6px 6px 0; padding: 0.7rem 1rem; margin: 0.8rem 0; font-size: 13px; color: #633806; font-family: var(--font-sans, sans-serif); line-height: 1.55; }
+.api-row { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; border-bottom: 0.5px solid var(--border); padding: 7px 0; align-items: start; }
+.api-row:last-child { border-bottom: none; }
+.api-name { font-size: 13px; font-family: var(--font-mono, monospace); color: #0F6E56; font-weight: 500; }
+.api-desc { font-size: 13px; color: var(--text-secondary); font-family: var(--font-sans, sans-serif); }
+.step-label { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; }
+.num-circle { width: 24px; height: 24px; border-radius: 50%; background: var(--bg-accent, #E6F1FB); color: var(--text-accent, #185FA5); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--font-sans, sans-serif); }
+.nav-footer { display: flex; justify-content: space-between; margin-top: 1.5rem; padding-top: 1rem; border-top: 0.5px solid var(--border); }
+.nav-btn { background: transparent; border: 0.5px solid var(--border-strong, #888); border-radius: 6px; padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--text-primary); font-family: var(--font-sans, sans-serif); }
+.nav-btn:hover { background: var(--surface-1); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0.8rem 0; }
+.spec-card { background: var(--surface-1, #f5f4f0); border: 0.5px solid var(--border); border-radius: 8px; padding: 0.6rem 0.9rem; }
+.spec-key { font-size: 11px; color: var(--text-muted); font-family: var(--font-sans, sans-serif); margin-bottom: 2px; }
+.spec-val { font-size: 13px; font-weight: 500; color: var(--text-primary); font-family: var(--font-mono, monospace); }
+</style>
+
+<div class="wrap">
+  <h2 style="sr-only">Tutorial introdutório ao Picotron</h2>
+
+  <div style="margin-bottom:1.2rem;">
+    <span class="badge badge-purple" style="margin-right:6px;">Picotron</span>
+    <span class="badge badge-teal">Tutorial introdutório</span>
+  </div>
+
+  <div class="step-nav" id="stepNav">
+    <button class="step-btn active" onclick="goTo(0)">0 · O que é</button>
+    <button class="step-btn" onclick="goTo(1)">1 · Estrutura</button>
+    <button class="step-btn" onclick="goTo(2)">2 · Olá mundo</button>
+    <button class="step-btn" onclick="goTo(3)">3 · Input</button>
+    <button class="step-btn" onclick="goTo(4)">4 · Sprites</button>
+    <button class="step-btn" onclick="goTo(5)">5 · Jogo completo</button>
+    <button class="step-btn" onclick="goTo(6)">6 · Próximos passos</button>
+  </div>
+
+  <div id="s0" class="section active">
+    <div class="step-label"><div class="num-circle">0</div><h2>O que é o Picotron?</h2></div>
+    <p>O Picotron é uma <strong style="font-weight:500">Fantasy Workstation</strong> criada pela Lexaloffle (os mesmos autores do PICO-8). É uma estação de trabalho retrô fictícia — um pequeno sistema operacional completo voltado para criar jogos pixel art, animações, músicas e demos.</p>
+    <p>Toda a programação é feita em <strong style="font-weight:500">Lua 5.4</strong>. Os projetos são chamados de <em>cartridges</em> (.p64) e podem ser exportados como HTML ou executáveis.</p>
+    <div class="spec-grid">
+      <div class="spec-card"><div class="spec-key">Resolução</div><div class="spec-val">480×270</div></div>
+      <div class="spec-card"><div class="spec-key">Cores</div><div class="spec-val">64 definíveis</div></div>
+      <div class="spec-card"><div class="spec-key">Linguagem</div><div class="spec-val">Lua 5.4</div></div>
+      <div class="spec-card"><div class="spec-key">Áudio</div><div class="spec-val">8 canais</div></div>
+      <div class="spec-card"><div class="spec-key">CPU virtual</div><div class="spec-val">8M inst/s</div></div>
+      <div class="spec-card"><div class="spec-key">Cartridge</div><div class="spec-val">.p64 / .p64.png</div></div>
+    </div>
+    <div class="tip">💡 Se você já conhece PICO-8, o Picotron é o seu "irmão mais velho": mesma filosofia, mas mais poderoso, com tela 16:9 e uma IDE completa.</div>
+    <div class="tip">📥 Adquira em: <strong style="font-weight:500">lexaloffle.com/picotron.php</strong> — disponível para Windows, Mac e Linux.</div>
+  </div>
+
+  <div id="s1" class="section">
+    <div class="step-label"><div class="num-circle">1</div><h2>Estrutura de um cartridge</h2></div>
+    <p>Ao abrir o Picotron, você trabalha com um <em>cartridge</em> — uma pasta virtual em <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">/ram/cart/</code>. O arquivo principal sempre se chama <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">main.lua</code>.</p>
+    <p>Todo jogo em Picotron tem três funções especiais que o sistema chama automaticamente:</p>
+    <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_init</span>()
+  <span class="cm">-- Chamada UMA VEZ ao iniciar o jogo</span>
+  <span class="cm">-- Use para: criar variáveis, carregar dados</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="cm">-- Chamada 60x por segundo</span>
+  <span class="cm">-- Use para: lógica, física, input do jogador</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="cm">-- Chamada a cada frame (60fps)</span>
+  <span class="cm">-- Use para: desenhar tudo na tela</span>
+<span class="kw">end</span></pre></div>
+    <div class="warn">⚠️ Nunca coloque lógica de jogo pesada dentro de _draw(). Separe: lógica → _update(), desenho → _draw().</div>
+    <p>Para rodar o cartridge, pressione <strong style="font-weight:500">CTRL+R</strong>. Para voltar ao editor, pressione <strong style="font-weight:500">ESC</strong>.</p>
+    <div style="margin-top:0.8rem;">
+      <div class="api-row" style="padding-top:0;"><span class="api-name">CTRL+R</span><span class="api-desc">Executar / reiniciar o cartridge</span></div>
+      <div class="api-row"><span class="api-name">ESC</span><span class="api-desc">Parar e voltar ao editor</span></div>
+      <div class="api-row"><span class="api-name">CTRL+S</span><span class="api-desc">Salvar o cartridge</span></div>
+      <div class="api-row"><span class="api-name">save nome</span><span class="api-desc">Salvar como nome.p64 (no terminal)</span></div>
+    </div>
+  </div>
+
+  <div id="s2" class="section">
+    <div class="step-label"><div class="num-circle">2</div><h2>Olá mundo: desenhando na tela</h2></div>
+    <p>Vamos conhecer as funções gráficas básicas. Cole isso no <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">main.lua</code> e pressione CTRL+R:</p>
+    <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_init</span>()
+  x = <span class="num">240</span>  <span class="cm">-- posição X (centro da tela)</span>
+  y = <span class="num">135</span>  <span class="cm">-- posição Y (centro da tela)</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)              <span class="cm">-- limpa a tela com cor 1 (azul escuro)</span>
+  <span class="fn">circfill</span>(x, y, <span class="num">20</span>, <span class="num">8</span>) <span class="cm">-- círculo sólido: x, y, raio, cor</span>
+  <span class="fn">print</span>(<span class="str">"Ola, Picotron!"</span>, <span class="num">180</span>, <span class="num">10</span>, <span class="num">7</span>) <span class="cm">-- texto: msg, x, y, cor</span>
+  <span class="fn">rectfill</span>(<span class="num">50</span>, <span class="num">200</span>, <span class="num">150</span>, <span class="num">220</span>, <span class="num">11</span>) <span class="cm">-- rect: x1,y1,x2,y2,cor</span>
+<span class="kw">end</span></pre></div>
+    <p>Funções gráficas essenciais:</p>
+    <div style="margin-bottom:1rem;">
+      <div class="api-row" style="padding-top:0;"><span class="api-name">cls(cor)</span><span class="api-desc">Limpa a tela com uma cor. Sempre a primeira chamada em _draw()</span></div>
+      <div class="api-row"><span class="api-name">print(txt,x,y,cor)</span><span class="api-desc">Escreve texto na posição (x,y)</span></div>
+      <div class="api-row"><span class="api-name">pset(x,y,cor)</span><span class="api-desc">Pinta um pixel</span></div>
+      <div class="api-row"><span class="api-name">line(x0,y0,x1,y1,cor)</span><span class="api-desc">Desenha uma linha</span></div>
+      <div class="api-row"><span class="api-name">rect(x0,y0,x1,y1,cor)</span><span class="api-desc">Retângulo (borda)</span></div>
+      <div class="api-row"><span class="api-name">rectfill(x0,y0,x1,y1,cor)</span><span class="api-desc">Retângulo sólido</span></div>
+      <div class="api-row"><span class="api-name">circ(x,y,r,cor)</span><span class="api-desc">Círculo (borda)</span></div>
+      <div class="api-row"><span class="api-name">circfill(x,y,r,cor)</span><span class="api-desc">Círculo sólido</span></div>
+    </div>
+    <div class="tip">💡 As cores são números de 0 a 63. As 16 primeiras (0–15) são as mais comuns e iguais às do PICO-8. Use <code style="font-family:var(--font-mono);font-size:12px">7</code> para branco e <code style="font-family:var(--font-mono);font-size:12px">0</code> para preto.</div>
+  </div>
+
+  <div id="s3" class="section">
+    <div class="step-label"><div class="num-circle">3</div><h2>Capturando input do jogador</h2></div>
+    <p>O Picotron usa <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">btn(n)</code> para ler botões e <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">btnp(n)</code> para detectar apenas o primeiro frame de pressão. Vamos mover nosso círculo:</p>
+    <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_init</span>()
+  x = <span class="num">240</span>
+  y = <span class="num">135</span>
+  vel = <span class="num">3</span>  <span class="cm">-- velocidade de movimento</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">0</span>) <span class="kw">then</span> x -= vel <span class="kw">end</span>  <span class="cm">-- ← esquerda</span>
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">1</span>) <span class="kw">then</span> x += vel <span class="kw">end</span>  <span class="cm">-- → direita</span>
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">2</span>) <span class="kw">then</span> y -= vel <span class="kw">end</span>  <span class="cm">-- ↑ cima</span>
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">3</span>) <span class="kw">then</span> y += vel <span class="kw">end</span>  <span class="cm">-- ↓ baixo</span>
+  
+  <span class="cm">-- Manter dentro da tela (480x270)</span>
+  x = <span class="fn">mid</span>(<span class="num">10</span>, x, <span class="num">470</span>)
+  y = <span class="fn">mid</span>(<span class="num">10</span>, y, <span class="num">260</span>)
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  <span class="fn">circfill</span>(x, y, <span class="num">10</span>, <span class="num">8</span>)
+  <span class="fn">print</span>(<span class="str">"use as setas!"</span>, <span class="num">190</span>, <span class="num">10</span>, <span class="num">7</span>)
+<span class="kw">end</span></pre></div>
+    <div style="margin-bottom:1rem;">
+      <div class="api-row" style="padding-top:0;"><span class="api-name">btn(0)</span><span class="api-desc">← Seta esquerda</span></div>
+      <div class="api-row"><span class="api-name">btn(1)</span><span class="api-desc">→ Seta direita</span></div>
+      <div class="api-row"><span class="api-name">btn(2)</span><span class="api-desc">↑ Seta cima</span></div>
+      <div class="api-row"><span class="api-name">btn(3)</span><span class="api-desc">↓ Seta baixo</span></div>
+      <div class="api-row"><span class="api-name">btn(4)</span><span class="api-desc">Z ou C (botão de ação)</span></div>
+      <div class="api-row"><span class="api-name">btn(5)</span><span class="api-desc">X ou V (botão de ação 2)</span></div>
+      <div class="api-row"><span class="api-name">btnp(n)</span><span class="api-desc">Verdadeiro apenas no primeiro frame pressionado</span></div>
+      <div class="api-row"><span class="api-name">mid(a,b,c)</span><span class="api-desc">Retorna o valor do meio — útil para clamping</span></div>
+    </div>
+    <div class="tip">💡 <code style="font-family:var(--font-mono);font-size:12px">x -= vel</code> é shorthand Picotron para <code style="font-family:var(--font-mono);font-size:12px">x = x - vel</code>. O Picotron suporta +=, -=, *=, /=.</div>
+  </div>
+
+  <div id="s4" class="section">
+    <div class="step-label"><div class="num-circle">4</div><h2>Sprites e o editor gráfico</h2></div>
+    <p>Sprites são desenhados no <strong style="font-weight:500">GFX Editor</strong> — o segundo workspace (ícone de paleta no topo). Cada sprite ocupa uma posição numerada (1, 2, 3…).</p>
+    <p>Depois de desenhar um sprite no editor, use <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">spr()</code> para desenhá-lo:</p>
+    <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  
+  <span class="cm">-- spr(índice, x, y)</span>
+  <span class="fn">spr</span>(<span class="num">1</span>, x, y)
+  
+  <span class="cm">-- Com flip horizontal (útil para personagens)</span>
+  <span class="fn">spr</span>(<span class="num">1</span>, x, y, <span class="kw">false</span>, <span class="kw">true</span>)  <span class="cm">-- hflip=false, vflip=true</span>
+  
+  <span class="cm">-- Sprite maior (2x2 tiles)</span>
+  <span class="fn">spr</span>(<span class="num">1</span>, x, y, <span class="kw">false</span>, <span class="kw">false</span>, <span class="num">2</span>, <span class="num">2</span>)
+<span class="kw">end</span></pre></div>
+    <p>O tamanho padrão de um sprite é <strong style="font-weight:500">16×16 pixels</strong> (diferente do PICO-8 que usa 8×8).</p>
+    <div style="margin-bottom:1rem;">
+      <div class="api-row" style="padding-top:0;"><span class="api-name">spr(n,x,y)</span><span class="api-desc">Desenha sprite de índice n na posição x,y</span></div>
+      <div class="api-row"><span class="api-name">spr(n,x,y,hf,vf)</span><span class="api-desc">Com flip horizontal (hf) e/ou vertical (vf)</span></div>
+      <div class="api-row"><span class="api-name">spr(n,x,y,hf,vf,w,h)</span><span class="api-desc">w e h em tiles (ex: 2,2 = sprite 32×32)</span></div>
+      <div class="api-row"><span class="api-name">palt(cor, transp)</span><span class="api-desc">Define se uma cor é transparente (true/false)</span></div>
+    </div>
+    <div class="tip">💡 Por padrão, a cor 0 (preto) é transparente nos sprites. Use <code style="font-family:var(--font-mono);font-size:12px">palt(0, false)</code> para torná-la opaca, ou <code style="font-family:var(--font-mono);font-size:12px">palt(n, true)</code> para tornar outra cor transparente.</div>
+    <div class="warn">⚠️ Sempre desenhe algo no GFX Editor (workspace 2) antes de tentar usar spr(). Um sprite vazio é invisível mas não dá erro.</div>
+  </div>
+
+  <div id="s5" class="section">
+    <div class="step-label"><div class="num-circle">5</div><h2>Jogo completo: "pega o ponto"</h2></div>
+    <p>Vamos montar um jogo simples do zero. O jogador (círculo azul) deve tocar o alvo (círculo vermelho) para pontuar. Cole no <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">main.lua</code>:</p>
+    <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_init</span>()
+  <span class="cm">-- jogador</span>
+  px, py = <span class="num">240</span>, <span class="num">135</span>
+  vel = <span class="num">3</span>
+  
+  <span class="cm">-- alvo</span>
+  <span class="fn">novo_alvo</span>()
+  
+  <span class="cm">-- placar</span>
+  pontos = <span class="num">0</span>
+  tempo  = <span class="num">600</span>  <span class="cm">-- 10 segundos a 60fps</span>
+  estado = <span class="str">"jogando"</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">novo_alvo</span>()
+  <span class="cm">-- posição aleatória na tela</span>
+  tx = <span class="fn">rnd</span>(<span class="num">440</span>) + <span class="num">20</span>
+  ty = <span class="fn">rnd</span>(<span class="num">230</span>) + <span class="num">20</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="kw">if</span> estado == <span class="str">"jogando"</span> <span class="kw">then</span>
+    <span class="cm">-- mover jogador</span>
+    <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">0</span>) <span class="kw">then</span> px -= vel <span class="kw">end</span>
+    <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">1</span>) <span class="kw">then</span> px += vel <span class="kw">end</span>
+    <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">2</span>) <span class="kw">then</span> py -= vel <span class="kw">end</span>
+    <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">3</span>) <span class="kw">then</span> py += vel <span class="kw">end</span>
+    px = <span class="fn">mid</span>(<span class="num">10</span>, px, <span class="num">470</span>)
+    py = <span class="fn">mid</span>(<span class="num">10</span>, py, <span class="num">260</span>)
+    
+    <span class="cm">-- colisão: distância entre jogador e alvo</span>
+    <span class="kw">local</span> dx = px - tx
+    <span class="kw">local</span> dy = py - ty
+    <span class="kw">if</span> dx*dx + dy*dy &lt; <span class="num">20</span>*<span class="num">20</span> <span class="kw">then</span>
+      pontos += <span class="num">1</span>
+      <span class="fn">sfx</span>(<span class="num">0</span>)   <span class="cm">-- toca sfx 0 (opcional)</span>
+      <span class="fn">novo_alvo</span>()
+    <span class="kw">end</span>
+    
+    <span class="cm">-- contagem regressiva</span>
+    tempo -= <span class="num">1</span>
+    <span class="kw">if</span> tempo &lt;= <span class="num">0</span> <span class="kw">then</span>
+      estado = <span class="str">"fim"</span>
+    <span class="kw">end</span>
+    
+  <span class="kw">elseif</span> estado == <span class="str">"fim"</span> <span class="kw">then</span>
+    <span class="kw">if</span> <span class="fn">btnp</span>(<span class="num">4</span>) <span class="kw">then</span>  <span class="cm">-- Z para reiniciar</span>
+      <span class="fn">_init</span>()
+    <span class="kw">end</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  
+  <span class="kw">if</span> estado == <span class="str">"jogando"</span> <span class="kw">then</span>
+    <span class="cm">-- desenhar alvo</span>
+    <span class="fn">circfill</span>(tx, ty, <span class="num">10</span>, <span class="num">8</span>)   <span class="cm">-- vermelho</span>
+    <span class="fn">circ</span>(tx, ty, <span class="num">10</span>, <span class="num">7</span>)       <span class="cm">-- borda branca</span>
+    
+    <span class="cm">-- desenhar jogador</span>
+    <span class="fn">circfill</span>(px, py, <span class="num">8</span>, <span class="num">12</span>)   <span class="cm">-- azul claro</span>
+    
+    <span class="cm">-- HUD</span>
+    <span class="fn">print</span>(<span class="str">"pontos: "</span>..pontos, <span class="num">10</span>, <span class="num">10</span>, <span class="num">7</span>)
+    <span class="fn">print</span>(<span class="str">"tempo: "</span>..<span class="fn">flr</span>(tempo/<span class="num">60</span>), <span class="num">380</span>, <span class="num">10</span>, <span class="num">7</span>)
+    
+  <span class="kw">elseif</span> estado == <span class="str">"fim"</span> <span class="kw">then</span>
+    <span class="fn">print</span>(<span class="str">"FIM DE JOGO!"</span>, <span class="num">190</span>, <span class="num">120</span>, <span class="num">8</span>)
+    <span class="fn">print</span>(<span class="str">"pontos: "</span>..pontos, <span class="num">210</span>, <span class="num">140</span>, <span class="num">7</span>)
+    <span class="fn">print</span>(<span class="str">"[Z] para jogar de novo"</span>, <span class="num">170</span>, <span class="num">160</span>, <span class="num">6</span>)
+  <span class="kw">end</span>
+<span class="kw">end</span></pre></div>
+    <div class="tip">💡 Conceitos usados neste jogo: variáveis de estado (<code style="font-family:var(--font-mono);font-size:12px">"jogando"/"fim"</code>), detecção de colisão por distância, temporizador com contagem em frames, e reinício via <code style="font-family:var(--font-mono);font-size:12px">_init()</code>.</div>
+    <div class="warn">⚠️ A linha <code style="font-family:var(--font-mono);font-size:12px">sfx(0)</code> só funciona se você tiver criado um som no SFX Editor. Pode remover essa linha se preferir.</div>
+  </div>
+
+  <div id="s6" class="section">
+    <div class="step-label"><div class="num-circle">6</div><h2>Próximos passos</h2></div>
+    <p>Com esses conceitos você já consegue criar jogos simples! Para ir além:</p>
+    <div style="margin-bottom:1rem;">
+      <div class="api-row" style="padding-top:0;"><span class="api-name">map()</span><span class="api-desc">Renderiza o mapa desenhado no Map Editor — ótimo para cenários</span></div>
+      <div class="api-row"><span class="api-name">sfx(n)</span><span class="api-desc">Toca o efeito sonoro n criado no SFX Editor</span></div>
+      <div class="api-row"><span class="api-name">music(n)</span><span class="api-desc">Inicia a trilha musical n</span></div>
+      <div class="api-row"><span class="api-name">camera(x,y)</span><span class="api-desc">Move a câmera — use para seguir o jogador no mapa</span></div>
+      <div class="api-row"><span class="api-name">include "arq.lua"</span><span class="api-desc">Divide o código em múltiplos arquivos Lua</span></div>
+      <div class="api-row"><span class="api-name">stat(n)</span><span class="api-desc">Informações do sistema (CPU, memória, frame count)</span></div>
+    </div>
+    <p>Recursos recomendados:</p>
+    <div class="tip">📖 <strong style="font-weight:500">Manual oficial:</strong> lexaloffle.com/dl/docs/picotron_manual.html</div>
+    <div class="tip">🎬 <strong style="font-weight:500">Vídeo introdutório:</strong> "Introduction to Picotron" — Lazy Devs (YouTube)</div>
+    <div class="tip">🕹️ <strong style="font-weight:500">Cartridges de exemplo:</strong> Veja o código de jogos no BBS do Picotron em lexaloffle.com/bbs/?cat=13</div>
+    <div class="tip">💬 <strong style="font-weight:500">Dúvidas?</strong> Pode perguntar aqui sobre qualquer conceito — Lua, colisões, sprites, mapas, áudio…</div>
+  </div>
+
+  <div class="nav-footer">
+    <button class="nav-btn" id="btnPrev" onclick="changeStep(-1)" disabled>← anterior</button>
+    <span style="font-size:12px;color:var(--text-muted);align-self:center;font-family:var(--font-sans,sans-serif);" id="stepIndicator">1 de 7</span>
+    <button class="nav-btn" id="btnNext" onclick="changeStep(1)">próximo →</button>
+  </div>
+</div>
+
+<script>
+let current = 0;
+const total = 7;
+
+function goTo(n) {
+  document.getElementById('s' + current).classList.remove('active');
+  document.querySelectorAll('.step-btn')[current].classList.remove('active');
+  current = n;
+  document.getElementById('s' + current).classList.add('active');
+  document.querySelectorAll('.step-btn')[current].classList.add('active');
+  document.getElementById('btnPrev').disabled = current === 0;
+  document.getElementById('btnNext').disabled = current === total - 1;
+  document.getElementById('stepIndicator').textContent = (current + 1) + ' de ' + total;
+}
+
+function changeStep(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < total) goTo(next);
+}
+</script>

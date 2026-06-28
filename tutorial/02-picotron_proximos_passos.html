@@ -1,0 +1,340 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1.5rem 0;max-width:680px}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
+.badge-purple{background:#EEEDFE;color:#3C3489}
+.badge-teal{background:#E1F5EE;color:#0F6E56}
+.badge-amber{background:#FAEEDA;color:#854F0B}
+.step-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem}
+.step-btn{background:transparent;border:0.5px solid var(--border-strong,#888);border-radius:6px;padding:5px 12px;font-size:12px;font-family:var(--font-mono,monospace);cursor:pointer;color:var(--text-secondary,#555);transition:all .15s}
+.step-btn.active{background:var(--bg-accent,#E6F1FB);border-color:var(--border-accent,#185FA5);color:var(--text-accent,#185FA5);font-weight:500}
+.step-btn:hover:not(.active){background:var(--surface-1,#f5f5f5)}
+.section{display:none}
+.section.active{display:block}
+h2{font-size:17px;font-weight:500;color:var(--text-primary);margin-bottom:.5rem;font-family:var(--font-sans,sans-serif)}
+p{font-size:14px;color:var(--text-secondary);line-height:1.65;margin-bottom:.9rem;font-family:var(--font-sans,sans-serif)}
+.code-block{background:var(--surface-1,#f5f4f0);border:0.5px solid var(--border,#ccc);border-radius:8px;padding:1rem 1.25rem;margin:.8rem 0 1rem;overflow-x:auto}
+.code-block pre{font-size:13px;line-height:1.7;color:var(--text-primary);font-family:var(--font-mono,monospace);white-space:pre}
+.kw{color:#534AB7;font-weight:500}
+.fn{color:#0F6E56}
+.cm{color:#888;font-style:italic}
+.str{color:#993C1D}
+.num{color:#854F0B}
+.tip{border-left:3px solid var(--border-accent,#185FA5);background:var(--bg-accent,#E6F1FB);border-radius:0 6px 6px 0;padding:.7rem 1rem;margin:.8rem 0;font-size:13px;color:var(--text-primary);font-family:var(--font-sans,sans-serif);line-height:1.55}
+.warn{border-left:3px solid #EF9F27;background:#FAEEDA;border-radius:0 6px 6px 0;padding:.7rem 1rem;margin:.8rem 0;font-size:13px;color:#633806;font-family:var(--font-sans,sans-serif);line-height:1.55}
+.ok{border-left:3px solid #3B6D11;background:#EAF3DE;border-radius:0 6px 6px 0;padding:.7rem 1rem;margin:.8rem 0;font-size:13px;color:#27500A;font-family:var(--font-sans,sans-serif);line-height:1.55}
+.api-row{display:grid;grid-template-columns:1fr 1.6fr;gap:8px;border-bottom:0.5px solid var(--border);padding:7px 0;align-items:start}
+.api-row:last-child{border-bottom:none}
+.api-name{font-size:13px;font-family:var(--font-mono,monospace);color:#0F6E56;font-weight:500}
+.api-desc{font-size:13px;color:var(--text-secondary);font-family:var(--font-sans,sans-serif)}
+.step-label{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+.num-circle{width:24px;height:24px;border-radius:50%;background:var(--bg-accent,#E6F1FB);color:var(--text-accent,#185FA5);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-sans,sans-serif)}
+.nav-footer{display:flex;justify-content:space-between;margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid var(--border)}
+.nav-btn{background:transparent;border:0.5px solid var(--border-strong,#888);border-radius:6px;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text-primary);font-family:var(--font-sans,sans-serif)}
+.nav-btn:hover{background:var(--surface-1)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+.ask-btn{background:transparent;border:0.5px solid var(--border-accent,#185FA5);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;color:var(--text-accent,#185FA5);font-family:var(--font-sans,sans-serif);margin-top:.5rem}
+.ask-btn:hover{background:var(--bg-accent,#E6F1FB)}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">Tutorial Picotron — próximos passos: mapas, câmera, áudio, múltiplos arquivos e exportação</h2>
+
+<div style="margin-bottom:1.2rem">
+  <span class="badge badge-purple" style="margin-right:6px">Picotron</span>
+  <span class="badge badge-teal" style="margin-right:6px">Próximos passos</span>
+  <span class="badge badge-amber">avançando além do básico</span>
+</div>
+
+<div class="step-nav" id="stepNav">
+  <button class="step-btn active" onclick="goTo(0)">1 · Mapa</button>
+  <button class="step-btn" onclick="goTo(1)">2 · Câmera</button>
+  <button class="step-btn" onclick="goTo(2)">3 · Áudio</button>
+  <button class="step-btn" onclick="goTo(3)">4 · Múltiplos arquivos</button>
+  <button class="step-btn" onclick="goTo(4)">5 · Tabelas Lua</button>
+  <button class="step-btn" onclick="goTo(5)">6 · stat() e debug</button>
+  <button class="step-btn" onclick="goTo(6)">7 · Exportar</button>
+</div>
+
+<div id="s0" class="section active">
+  <div class="step-label"><div class="num-circle">1</div><h2>Desenhando mapas com map()</h2></div>
+  <p>O Picotron tem um editor de mapas integrado (workspace do mapa, ícone de grade). Você desenha tiles usando os sprites do GFX Editor e depois renderiza tudo com uma linha de código.</p>
+  <p>O arquivo de mapa padrão é <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">map/0.map</code> e usa os sprites de <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">gfx/0.gfx</code>. Para desenhá-lo na tela:</p>
+  <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  
+  <span class="cm">-- map() básico — desenha o mapa inteiro</span>
+  <span class="fn">map</span>()
+  
+  <span class="cm">-- map(cx, cy, sx, sy, cw, ch)</span>
+  <span class="cm">-- cx,cy = célula inicial do mapa</span>
+  <span class="cm">-- sx,sy = posição na tela</span>
+  <span class="cm">-- cw,ch = quantidade de células a desenhar</span>
+  <span class="fn">map</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">30</span>, <span class="num">17</span>)
+  
+  <span class="cm">-- desenhar o jogador POR CIMA do mapa</span>
+  <span class="fn">circfill</span>(px, py, <span class="num">8</span>, <span class="num">12</span>)
+<span class="kw">end</span></pre></div>
+  <div style="margin-bottom:1rem">
+    <div class="api-row" style="padding-top:0"><span class="api-name">map()</span><span class="api-desc">Renderiza o mapa inteiro na posição (0,0) da tela</span></div>
+    <div class="api-row"><span class="api-name">map(cx,cy,sx,sy,cw,ch)</span><span class="api-desc">Renderiza uma região: célula (cx,cy) → tela (sx,sy), tamanho cw×ch células</span></div>
+    <div class="api-row"><span class="api-name">mget(cx,cy)</span><span class="api-desc">Retorna o índice do sprite na célula (cx,cy) do mapa</span></div>
+    <div class="api-row"><span class="api-name">mset(cx,cy,n)</span><span class="api-desc">Define o sprite da célula (cx,cy) como n — útil para blocos destrutíveis</span></div>
+    <div class="api-row"><span class="api-name">fget(n,f)</span><span class="api-desc">Retorna o valor do flag f do sprite n — use para marcar tiles sólidos</span></div>
+  </div>
+  <div class="tip">💡 No GFX Editor, cada sprite tem 8 flags (0–7) que você pode ligar/desligar. Convenção comum: flag 0 = sólido (colide). Use <code style="font-family:var(--font-mono);font-size:12px">fget(mget(cx,cy), 0)</code> para checar colisão com o mapa.</div>
+  <div class="warn">⚠️ O tile padrão é 16×16 px. Para calcular a célula a partir de coordenadas de pixel: <code style="font-family:var(--font-mono);font-size:12px">cx = flr(px/16)</code>, <code style="font-family:var(--font-mono);font-size:12px">cy = flr(py/16)</code>.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como faço colisão do jogador com tiles sólidos do mapa no Picotron?')">Como fazer colisão com o mapa? ↗</button>
+</div>
+
+<div id="s1" class="section">
+  <div class="step-label"><div class="num-circle">2</div><h2>Câmera para seguir o jogador</h2></div>
+  <p>Quando o mapa é maior que a tela (480×270), você precisa mover a câmera para que o jogador fique sempre visível. A função <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">camera()</code> translada todo o sistema de coordenadas do desenho.</p>
+  <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  
+  <span class="cm">-- câmera centralizada no jogador</span>
+  <span class="cm">-- subtrai metade da tela para centralizar</span>
+  <span class="fn">camera</span>(px - <span class="num">240</span>, py - <span class="num">135</span>)
+  
+  <span class="cm">-- tudo desenhado depois usa as coords do mundo</span>
+  <span class="fn">map</span>()
+  <span class="fn">circfill</span>(px, py, <span class="num">8</span>, <span class="num">12</span>)
+  
+  <span class="cm">-- resetar câmera antes de desenhar o HUD!</span>
+  <span class="fn">camera</span>()
+  <span class="fn">print</span>(<span class="str">"pontos: "</span>..pontos, <span class="num">10</span>, <span class="num">10</span>, <span class="num">7</span>)
+<span class="kw">end</span></pre></div>
+  <p>Para uma câmera suavizada (sem cortes bruscos), use interpolação:</p>
+  <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_init</span>()
+  px, py = <span class="num">100</span>, <span class="num">100</span>
+  cam_x, cam_y = px, py  <span class="cm">-- posição atual da câmera</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="cm">-- mover jogador...</span>
+  
+  <span class="cm">-- câmera suave: aproxima 20% por frame</span>
+  cam_x += (px - cam_x) * <span class="num">0.2</span>
+  cam_y += (py - cam_y) * <span class="num">0.2</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  <span class="fn">camera</span>(cam_x - <span class="num">240</span>, cam_y - <span class="num">135</span>)
+  <span class="fn">map</span>()
+  <span class="fn">circfill</span>(px, py, <span class="num">8</span>, <span class="num">12</span>)
+  <span class="fn">camera</span>()  <span class="cm">-- resetar para o HUD</span>
+<span class="kw">end</span></pre></div>
+  <div class="tip">💡 Sempre chame <code style="font-family:var(--font-mono);font-size:12px">camera()</code> (sem argumentos) antes de desenhar o HUD — caso contrário, os textos e barras de vida vão "viajar" junto com o mundo.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como limitar a câmera para não sair das bordas do mapa no Picotron?')">Como limitar a câmera nas bordas do mapa? ↗</button>
+</div>
+
+<div id="s2" class="section">
+  <div class="step-label"><div class="num-circle">3</div><h2>Áudio: efeitos e música</h2></div>
+  <p>O Picotron tem um sintetizador de 64 nós e um tracker de 8 canais. Os efeitos sonoros são criados no <strong style="font-weight:500">SFX Editor</strong> (workspace de notas musicais) e tocados com <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">sfx()</code>. Músicas de fundo usam <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">music()</code>.</p>
+  <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_init</span>()
+  <span class="cm">-- iniciar música de fundo (padrão: loop infinito)</span>
+  <span class="fn">music</span>(<span class="num">0</span>)
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="cm">-- tocar efeito sonoro ao pressionar Z</span>
+  <span class="kw">if</span> <span class="fn">btnp</span>(<span class="num">4</span>) <span class="kw">then</span>
+    <span class="fn">sfx</span>(<span class="num">0</span>)          <span class="cm">-- sfx índice 0</span>
+  <span class="kw">end</span>
+  
+  <span class="cm">-- sfx em canal específico (evita cortar outro)</span>
+  <span class="kw">if</span> coletou_item <span class="kw">then</span>
+    <span class="fn">sfx</span>(<span class="num">1</span>, <span class="num">1</span>)       <span class="cm">-- sfx 1 no canal 1</span>
+  <span class="kw">end</span>
+  
+  <span class="cm">-- parar música</span>
+  <span class="kw">if</span> game_over <span class="kw">then</span>
+    <span class="fn">music</span>(-<span class="num">1</span>)        <span class="cm">-- -1 para a música</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></pre></div>
+  <div style="margin-bottom:1rem">
+    <div class="api-row" style="padding-top:0"><span class="api-name">sfx(n)</span><span class="api-desc">Toca o efeito sonoro de índice n</span></div>
+    <div class="api-row"><span class="api-name">sfx(n, canal)</span><span class="api-desc">Toca sfx n no canal específico (0–7)</span></div>
+    <div class="api-row"><span class="api-name">sfx(-1)</span><span class="api-desc">Para todos os sfx</span></div>
+    <div class="api-row"><span class="api-name">music(n)</span><span class="api-desc">Inicia a trilha n em loop</span></div>
+    <div class="api-row"><span class="api-name">music(-1)</span><span class="api-desc">Para a música de fundo</span></div>
+  </div>
+  <div class="ok">✓ Dica de workflow: crie seus sfx com SPD baixo (1–4) para efeitos curtos e percussivos. SPD alto (16+) funciona melhor para melodias.</div>
+  <div class="warn">⚠️ O Picotron tem 8 canais de áudio. Cada <code style="font-family:var(--font-mono);font-size:12px">sfx()</code> ocupa um canal. Se não especificar o canal, o sistema escolhe um disponível automaticamente.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como criar um efeito de pulo no SFX Editor do Picotron?')">Como criar um sfx de pulo? ↗</button>
+</div>
+
+<div id="s3" class="section">
+  <div class="step-label"><div class="num-circle">4</div><h2>Múltiplos arquivos com include</h2></div>
+  <p>Conforme o jogo cresce, é boa prática separar o código em arquivos <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">.lua</code> diferentes. Use <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">include</code> no topo do <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">main.lua</code>:</p>
+  <div class="code-block"><pre><span class="cm">-- main.lua</span>
+<span class="kw">include</span> <span class="str">"player.lua"</span>
+<span class="kw">include</span> <span class="str">"inimigos.lua"</span>
+<span class="kw">include</span> <span class="str">"hud.lua"</span>
+
+<span class="kw">function</span> <span class="fn">_init</span>()
+  <span class="fn">player_init</span>()    <span class="cm">-- definida em player.lua</span>
+  <span class="fn">inimigos_init</span>()  <span class="cm">-- definida em inimigos.lua</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="fn">player_update</span>()
+  <span class="fn">inimigos_update</span>()
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  <span class="fn">map</span>()
+  <span class="fn">player_draw</span>()
+  <span class="fn">inimigos_draw</span>()
+  <span class="fn">hud_draw</span>()      <span class="cm">-- definida em hud.lua</span>
+<span class="kw">end</span></pre></div>
+  <p>Exemplo de como fica o <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">player.lua</code>:</p>
+  <div class="code-block"><pre><span class="cm">-- player.lua</span>
+<span class="kw">function</span> <span class="fn">player_init</span>()
+  px, py = <span class="num">240</span>, <span class="num">135</span>
+  pvida = <span class="num">3</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">player_update</span>()
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">0</span>) <span class="kw">then</span> px -= <span class="num">3</span> <span class="kw">end</span>
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">1</span>) <span class="kw">then</span> px += <span class="num">3</span> <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">player_draw</span>()
+  <span class="fn">spr</span>(<span class="num">1</span>, px, py)
+<span class="kw">end</span></pre></div>
+  <p>Para criar um novo arquivo de código: clique em <strong style="font-weight:500">[+]</strong> na aba do editor de código, digite o nome (ex: <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">player</code>) e o Picotron adiciona <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">.lua</code> automaticamente.</p>
+  <div class="tip">💡 Variáveis declaradas sem <code style="font-family:var(--font-mono);font-size:12px">local</code> são globais e visíveis em todos os arquivos incluídos. Use isso a seu favor para compartilhar estado, mas com moderação.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como organizar um jogo Picotron maior com múltiplos arquivos Lua?')">Como organizar projetos maiores? ↗</button>
+</div>
+
+<div id="s4" class="section">
+  <div class="step-label"><div class="num-circle">5</div><h2>Tabelas Lua para listas e objetos</h2></div>
+  <p>Em Lua, tabelas (<code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">{}</code>) servem tanto como arrays quanto como objetos. São essenciais para gerenciar listas de inimigos, projéteis e itens.</p>
+  <div class="code-block"><pre><span class="cm">-- lista de inimigos</span>
+inimigos = {}
+
+<span class="kw">function</span> <span class="fn">criar_inimigo</span>(x, y)
+  <span class="fn">add</span>(inimigos, {
+    x = x, y = y,
+    vida = <span class="num">3</span>,
+    vel = <span class="num">1</span>
+  })
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="cm">-- iterar todos os inimigos</span>
+  <span class="kw">for</span> ini <span class="kw">in</span> <span class="fn">all</span>(inimigos) <span class="kw">do</span>
+    ini.x += ini.vel
+    
+    <span class="cm">-- remover se saiu da tela</span>
+    <span class="kw">if</span> ini.x > <span class="num">500</span> <span class="kw">then</span>
+      <span class="fn">del</span>(inimigos, ini)
+    <span class="kw">end</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  <span class="kw">for</span> ini <span class="kw">in</span> <span class="fn">all</span>(inimigos) <span class="kw">do</span>
+    <span class="fn">spr</span>(<span class="num">2</span>, ini.x, ini.y)
+  <span class="kw">end</span>
+<span class="kw">end</span></pre></div>
+  <div style="margin-bottom:1rem">
+    <div class="api-row" style="padding-top:0"><span class="api-name">add(t, v)</span><span class="api-desc">Adiciona o valor v ao final da tabela t</span></div>
+    <div class="api-row"><span class="api-name">del(t, v)</span><span class="api-desc">Remove o valor v da tabela t (seguro dentro de loops)</span></div>
+    <div class="api-row"><span class="api-name">all(t)</span><span class="api-desc">Iterador para usar em <code style="font-family:var(--font-mono);font-size:12px">for x in all(t)</code> — safe para del()</span></div>
+    <div class="api-row"><span class="api-name">#t</span><span class="api-desc">Quantidade de elementos na tabela t</span></div>
+    <div class="api-row"><span class="api-name">count(t)</span><span class="api-desc">Alternativa a #t, mais confiável com tabelas esparsas</span></div>
+  </div>
+  <div class="ok">✓ Use <code style="font-family:var(--font-mono);font-size:12px">for x in all(t)</code> sempre que for chamar <code style="font-family:var(--font-mono);font-size:12px">del()</code> dentro do loop. O iterador <code style="font-family:var(--font-mono);font-size:12px">all()</code> é seguro para remoção; um <code style="font-family:var(--font-mono);font-size:12px">for i=1,#t</code> normal não é.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como fazer colisão entre o jogador e uma lista de inimigos no Picotron?')">Como checar colisão com lista de inimigos? ↗</button>
+</div>
+
+<div id="s5" class="section">
+  <div class="step-label"><div class="num-circle">6</div><h2>stat() e técnicas de debug</h2></div>
+  <p>A função <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">stat()</code> retorna informações do sistema em tempo real — muito útil para monitorar performance e debugar.</p>
+  <div class="code-block"><pre><span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  <span class="fn">map</span>()
+  
+  <span class="cm">-- painel de debug (remova no jogo final!)</span>
+  <span class="fn">camera</span>()  <span class="cm">-- resetar câmera antes</span>
+  <span class="fn">print</span>(<span class="str">"cpu: "</span>..<span class="fn">flr</span>(<span class="fn">stat</span>(<span class="num">1</span>)*<span class="num">100</span>)..<span class="str">"%"</span>, <span class="num">400</span>, <span class="num">250</span>, <span class="num">7</span>)
+  <span class="fn">print</span>(<span class="str">"fps: "</span>..<span class="fn">stat</span>(<span class="num">7</span>), <span class="num">400</span>, <span class="num">260</span>, <span class="num">7</span>)
+  <span class="fn">print</span>(<span class="str">"obj: "</span>..<span class="fn">count</span>(inimigos), <span class="num">400</span>, <span class="num">240</span>, <span class="num">7</span>)
+<span class="kw">end</span></pre></div>
+  <p>Valores de <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">stat(n)</code> mais usados:</p>
+  <div style="margin-bottom:1rem">
+    <div class="api-row" style="padding-top:0"><span class="api-name">stat(0)</span><span class="api-desc">Memória usada (em KB)</span></div>
+    <div class="api-row"><span class="api-name">stat(1)</span><span class="api-desc">CPU usada no último frame (0.0 a 1.0+)</span></div>
+    <div class="api-row"><span class="api-name">stat(7)</span><span class="api-desc">FPS atual</span></div>
+    <div class="api-row"><span class="api-name">stat(32..35)</span><span class="api-desc">Posição e botões do mouse (32=x, 33=y, 34=botões)</span></div>
+    <div class="api-row"><span class="api-name">stat(36)</span><span class="api-desc">Roda do mouse (scroll)</span></div>
+  </div>
+  <p>Outro recurso útil: o <strong style="font-weight:500">terminal</strong> do Picotron (ESC no desktop). Você pode inspecionar variáveis globais digitando o nome delas diretamente.</p>
+  <div class="tip">💡 Se <code style="font-family:var(--font-mono);font-size:12px">stat(1)</code> ficar acima de 1.0 consistentemente, o jogo está processando mais do que consegue em 60fps — hora de otimizar loops ou reduzir objetos na tela.</div>
+  <div class="warn">⚠️ O Picotron tem um limite de <strong style="font-weight:500">8M instruções Lua por segundo</strong>. Loops muito pesados em _update() podem fazer o framerate cair para 30fps automaticamente.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como otimizar a performance de um jogo no Picotron quando o CPU está alto?')">Dicas de otimização de performance ↗</button>
+</div>
+
+<div id="s6" class="section">
+  <div class="step-label"><div class="num-circle">7</div><h2>Exportar e compartilhar seu jogo</h2></div>
+  <p>Quando o jogo estiver pronto, o Picotron permite exportar como <strong style="font-weight:500">HTML</strong>, <strong style="font-weight:500">executável</strong> (Windows/Mac/Linux) ou como <strong style="font-weight:500">cartridge PNG</strong> para o BBS.</p>
+  <div class="code-block"><pre><span class="cm">-- No terminal do Picotron:</span>
+
+<span class="cm">-- 1. Salvar o cartridge primeiro</span>
+save meujogo.p64
+
+<span class="cm">-- 2. Capturar a label (capa do jogo)</span>
+<span class="cm">-- Pressione CTRL+7 enquanto o jogo roda</span>
+
+<span class="cm">-- 3. Adicionar metadados</span>
+about /ram/cart
+
+<span class="cm">-- 4. Exportar como HTML (roda no navegador)</span>
+export meujogo.html
+
+<span class="cm">-- 5. Exportar como PNG cartridge (256k)</span>
+export meujogo.p64.png
+
+<span class="cm">-- 6. Exportar como executável</span>
+export meujogo.bin</pre></div>
+  <div style="margin-bottom:1rem">
+    <div class="api-row" style="padding-top:0"><span class="api-name">save nome.p64</span><span class="api-desc">Salva o cartridge no drive do Picotron</span></div>
+    <div class="api-row"><span class="api-name">export nome.html</span><span class="api-desc">Exporta como página web — fácil de hospedar no itch.io</span></div>
+    <div class="api-row"><span class="api-name">export nome.p64.png</span><span class="api-desc">Cartridge PNG de 256k — compatível com o BBS do Lexaloffle</span></div>
+    <div class="api-row"><span class="api-name">export nome.bin</span><span class="api-desc">Executável standalone para Windows, Mac ou Linux</span></div>
+    <div class="api-row"><span class="api-name">CTRL+7</span><span class="api-desc">Captura um screenshot do jogo rodando como capa do cartridge</span></div>
+    <div class="api-row"><span class="api-name">about /ram/cart</span><span class="api-desc">Define título, autor e versão do cartridge</span></div>
+  </div>
+  <div class="ok">✓ O export HTML é o mais prático para compartilhar — funciona no itch.io, no BBS e em qualquer hospedagem estática. O jogo roda direto no navegador sem instalar nada.</div>
+  <div class="tip">💡 Recursos da comunidade: <strong style="font-weight:500">lexaloffle.com/bbs/?cat=13</strong> (cartridges), <strong style="font-weight:500">lexaloffle.com/dl/docs/picotron_manual.html</strong> (manual oficial).</div>
+  <button class="ask-btn" onclick="sendPrompt('Como publicar um jogo Picotron no itch.io usando o export HTML?')">Como publicar no itch.io? ↗</button>
+</div>
+
+<div class="nav-footer">
+  <button class="nav-btn" id="btnPrev" onclick="changeStep(-1)" disabled>← anterior</button>
+  <span style="font-size:12px;color:var(--text-muted);align-self:center;font-family:var(--font-sans,sans-serif)" id="stepIndicator">1 de 7</span>
+  <button class="nav-btn" id="btnNext" onclick="changeStep(1)">próximo →</button>
+</div>
+</div>
+
+<script>
+let cur=0;const total=7;
+function goTo(n){
+  document.getElementById('s'+cur).classList.remove('active');
+  document.querySelectorAll('.step-btn')[cur].classList.remove('active');
+  cur=n;
+  document.getElementById('s'+cur).classList.add('active');
+  document.querySelectorAll('.step-btn')[cur].classList.add('active');
+  document.getElementById('btnPrev').disabled=cur===0;
+  document.getElementById('btnNext').disabled=cur===total-1;
+  document.getElementById('stepIndicator').textContent=(cur+1)+' de '+total;
+}
+function changeStep(d){const n=cur+d;if(n>=0&&n<total)goTo(n);}
+</script>
