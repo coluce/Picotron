@@ -1,0 +1,492 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1.5rem 0;max-width:680px}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
+.badge-purple{background:#EEEDFE;color:#3C3489}
+.badge-teal{background:#E1F5EE;color:#0F6E56}
+.badge-coral{background:#FAECE7;color:#993C1D}
+.step-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem}
+.step-btn{background:transparent;border:0.5px solid var(--border-strong,#888);border-radius:6px;padding:5px 12px;font-size:12px;font-family:var(--font-mono,monospace);cursor:pointer;color:var(--text-secondary,#555);transition:all .15s}
+.step-btn.active{background:var(--bg-accent,#E6F1FB);border-color:var(--border-accent,#185FA5);color:var(--text-accent,#185FA5);font-weight:500}
+.step-btn:hover:not(.active){background:var(--surface-1,#f5f5f5)}
+.section{display:none}
+.section.active{display:block}
+h2{font-size:17px;font-weight:500;color:var(--text-primary);margin-bottom:.5rem;font-family:var(--font-sans,sans-serif)}
+p{font-size:14px;color:var(--text-secondary);line-height:1.65;margin-bottom:.9rem;font-family:var(--font-sans,sans-serif)}
+.cb{background:var(--surface-1,#f5f4f0);border:0.5px solid var(--border,#ccc);border-radius:8px;padding:1rem 1.25rem;margin:.8rem 0 1rem;overflow-x:auto}
+.cb pre{font-size:13px;line-height:1.7;color:var(--text-primary);font-family:var(--font-mono,monospace);white-space:pre}
+.kw{color:#534AB7;font-weight:500}
+.fn{color:#0F6E56}
+.cm{color:#888;font-style:italic}
+.str{color:#993C1D}
+.num{color:#854F0B}
+.tip{border-left:3px solid var(--border-accent,#185FA5);background:var(--bg-accent,#E6F1FB);border-radius:0 6px 6px 0;padding:.7rem 1rem;margin:.8rem 0;font-size:13px;color:var(--text-primary);font-family:var(--font-sans,sans-serif);line-height:1.55}
+.warn{border-left:3px solid #EF9F27;background:#FAEEDA;border-radius:0 6px 6px 0;padding:.7rem 1rem;margin:.8rem 0;font-size:13px;color:#633806;font-family:var(--font-sans,sans-serif);line-height:1.55}
+.ok{border-left:3px solid #3B6D11;background:#EAF3DE;border-radius:0 6px 6px 0;padding:.7rem 1rem;margin:.8rem 0;font-size:13px;color:#27500A;font-family:var(--font-sans,sans-serif);line-height:1.55}
+.ar{display:grid;grid-template-columns:1fr 1.6fr;gap:8px;border-bottom:0.5px solid var(--border);padding:7px 0;align-items:start}
+.ar:last-child{border-bottom:none}
+.an{font-size:13px;font-family:var(--font-mono,monospace);color:#0F6E56;font-weight:500}
+.ad{font-size:13px;color:var(--text-secondary);font-family:var(--font-sans,sans-serif)}
+.sl{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+.nc{width:24px;height:24px;border-radius:50%;background:var(--bg-accent,#E6F1FB);color:var(--text-accent,#185FA5);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-sans,sans-serif)}
+.nf{display:flex;justify-content:space-between;margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid var(--border)}
+.nb{background:transparent;border:0.5px solid var(--border-strong,#888);border-radius:6px;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text-primary);font-family:var(--font-sans,sans-serif)}
+.nb:hover{background:var(--surface-1)}
+.nb:disabled{opacity:.3;cursor:default}
+.ask-btn{background:transparent;border:0.5px solid var(--border-accent,#185FA5);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;color:var(--text-accent,#185FA5);font-family:var(--font-sans,sans-serif);margin-top:.5rem}
+.ask-btn:hover{background:var(--bg-accent,#E6F1FB)}
+canvas{border-radius:8px;border:0.5px solid var(--border,#ccc);display:block;width:100%;margin-bottom:1rem}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">Tutorial de colisão no Picotron — círculo, retângulo, mapa e técnicas avançadas</h2>
+
+<div style="margin-bottom:1.2rem">
+  <span class="badge badge-purple" style="margin-right:6px">Picotron</span>
+  <span class="badge badge-teal" style="margin-right:6px">Colisão</span>
+  <span class="badge badge-coral">detecção e resposta</span>
+</div>
+
+<div class="step-nav" id="stepNav">
+  <button class="step-btn active" onclick="goTo(0)">1 · Conceitos</button>
+  <button class="step-btn" onclick="goTo(1)">2 · Círculo×círculo</button>
+  <button class="step-btn" onclick="goTo(2)">3 · Rect×rect (AABB)</button>
+  <button class="step-btn" onclick="goTo(3)">4 · Círculo×rect</button>
+  <button class="step-btn" onclick="goTo(4)">5 · Mapa (tiles)</button>
+  <button class="step-btn" onclick="goTo(5)">6 · Separação de eixos</button>
+  <button class="step-btn" onclick="goTo(6)">7 · Plataforma completa</button>
+</div>
+
+<div id="s0" class="section active">
+  <div class="sl"><div class="nc">1</div><h2>Conceitos fundamentais</h2></div>
+  <p>Colisão em jogos 2D tem duas etapas distintas: <strong style="font-weight:500">detecção</strong> (os objetos se tocam?) e <strong style="font-weight:500">resposta</strong> (o que acontece quando tocam?). A técnica certa depende do formato dos objetos.</p>
+  <canvas id="cv0" width="640" height="160"></canvas>
+  <p>Os três formatos mais usados no Picotron:</p>
+  <div style="margin-bottom:1rem">
+    <div class="ar" style="padding-top:0"><span class="an">círculo</span><span class="ad">Projéteis, personagens, inimigos redondos. Colisão via distância — simples e barato.</span></div>
+    <div class="ar"><span class="an">AABB</span><span class="ad">Axis-Aligned Bounding Box — retângulo sem rotação. O mais comum para personagens e itens.</span></div>
+    <div class="ar"><span class="an">tile sólido</span><span class="ad">Células do mapa marcadas com flag 0. Colisão com o mundo via mget/fget.</span></div>
+  </div>
+  <div class="tip">💡 Regra prática: use círculos para objetos que se movem rápido (projéteis), AABB para o jogador e inimigos, e tiles para o cenário. Misturar os três é o normal.</div>
+  <div class="warn">⚠️ Detecção e resposta são coisas separadas. Detectar que dois objetos se sobrepõem é fácil — decidir como afastá-los sem bugs é onde está o trabalho.</div>
+</div>
+
+<div id="s1" class="section">
+  <div class="sl"><div class="nc">2</div><h2>Colisão círculo × círculo</h2></div>
+  <p>A técnica mais simples do Picotron. Dois círculos colidem quando a distância entre seus centros é menor que a soma dos raios. Para evitar a raiz quadrada (cara em CPU), compare os quadrados.</p>
+  <canvas id="cv1" width="640" height="160"></canvas>
+  <div class="cb"><pre><span class="cm">-- detecção: retorna true se os dois círculos colidem</span>
+<span class="kw">function</span> <span class="fn">colide_circ</span>(x1, y1, r1, x2, y2, r2)
+  <span class="kw">local</span> dx = x2 - x1
+  <span class="kw">local</span> dy = y2 - y1
+  <span class="kw">local</span> dist2 = dx*dx + dy*dy
+  <span class="kw">local</span> raios = r1 + r2
+  <span class="kw">return</span> dist2 &lt; raios*raios
+<span class="kw">end</span>
+
+<span class="cm">-- uso no _update:</span>
+<span class="kw">if</span> <span class="fn">colide_circ</span>(px, py, <span class="num">8</span>, ex, ey, <span class="num">10</span>) <span class="kw">then</span>
+  <span class="cm">-- jogador tocou inimigo!</span>
+  vida -= <span class="num">1</span>
+<span class="kw">end</span>
+
+<span class="cm">-- com lista de inimigos:</span>
+<span class="kw">for</span> e <span class="kw">in</span> <span class="fn">all</span>(inimigos) <span class="kw">do</span>
+  <span class="kw">if</span> <span class="fn">colide_circ</span>(px, py, <span class="num">8</span>, e.x, e.y, e.r) <span class="kw">then</span>
+    <span class="fn">del</span>(inimigos, e)
+    pontos += <span class="num">1</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></pre></div>
+  <div class="ok">✓ Sem raiz quadrada: comparar dist² com (r1+r2)² dá o mesmo resultado e é muito mais rápido. Use sempre essa forma.</div>
+  <div class="tip">💡 Para colisão círculo × ponto (ex: coletar um item sem tamanho): use <code style="font-family:var(--font-mono);font-size:12px">colide_circ(px, py, r, item.x, item.y, 0)</code> — raio 0 funciona perfeitamente.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como fazer projéteis que colidem com inimigos no Picotron usando colisão circular?')">Como fazer projéteis com colisão circular? ↗</button>
+</div>
+
+<div id="s2" class="section">
+  <div class="sl"><div class="nc">3</div><h2>Colisão rect × rect (AABB)</h2></div>
+  <p>Dois retângulos sem rotação colidem quando se sobrepõem nos dois eixos ao mesmo tempo. A representação mais prática é com x, y (canto superior-esquerdo), largura w e altura h.</p>
+  <canvas id="cv2" width="640" height="160"></canvas>
+  <div class="cb"><pre><span class="cm">-- detecção AABB: x,y = canto sup-esq; w,h = tamanho</span>
+<span class="kw">function</span> <span class="fn">colide_aabb</span>(x1,y1,w1,h1, x2,y2,w2,h2)
+  <span class="kw">return</span> x1 &lt; x2+w2
+     <span class="kw">and</span> x1+w1 > x2
+     <span class="kw">and</span> y1 &lt; y2+h2
+     <span class="kw">and</span> y1+h1 > y2
+<span class="kw">end</span>
+
+<span class="cm">-- uso: jogador 16x16 vs item 12x12</span>
+<span class="kw">if</span> <span class="fn">colide_aabb</span>(px,py,<span class="num">16</span>,<span class="num">16</span>, item.x,item.y,<span class="num">12</span>,<span class="num">12</span>) <span class="kw">then</span>
+  <span class="fn">sfx</span>(<span class="num">0</span>)
+  <span class="fn">del</span>(itens, item)
+<span class="kw">end</span>
+
+<span class="cm">-- guardar como tabela para reutilizar:</span>
+<span class="kw">function</span> <span class="fn">bbox</span>(obj)
+  <span class="cm">-- retorna o bounding box de um objeto</span>
+  <span class="kw">return</span> obj.x, obj.y, obj.w, obj.h
+<span class="kw">end</span>
+
+<span class="kw">if</span> <span class="fn">colide_aabb</span>(<span class="fn">bbox</span>(jogador), <span class="fn">bbox</span>(inimigo)) <span class="kw">then</span>
+  <span class="cm">-- colisão!</span>
+<span class="kw">end</span></pre></div>
+  <div class="ok">✓ AABB é a técnica mais usada para jogadores e inimigos. As 4 condições parecem muitas, mas o Lua avalia em curto-circuito — assim que uma for falsa, para.</div>
+  <div class="tip">💡 Dica de hitbox: faça o hitbox do jogador ligeiramente menor que o sprite visual (ex: sprite 16×16, hitbox 12×14). Isso torna o jogo mais justo e menos frustrante.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como calcular o quanto dois retângulos se sobrepõem no Picotron para empurrar objetos?')">Como calcular a sobreposição entre dois rects? ↗</button>
+</div>
+
+<div id="s3" class="section">
+  <div class="sl"><div class="nc">4</div><h2>Colisão círculo × retângulo</h2></div>
+  <p>Útil quando o jogador é um círculo e os obstáculos são caixas (ou vice-versa). A técnica usa o ponto mais próximo do retângulo ao centro do círculo.</p>
+  <canvas id="cv3" width="640" height="160"></canvas>
+  <div class="cb"><pre><span class="cm">-- cx,cy,cr = centro e raio do círculo</span>
+<span class="cm">-- rx,ry,rw,rh = rect (canto sup-esq + tamanho)</span>
+<span class="kw">function</span> <span class="fn">colide_circ_rect</span>(cx, cy, cr, rx, ry, rw, rh)
+  <span class="cm">-- ponto mais próximo do rect ao centro do círculo</span>
+  <span class="kw">local</span> px = <span class="fn">mid</span>(cx, rx, rx+rw)
+  <span class="kw">local</span> py = <span class="fn">mid</span>(cy, ry, ry+rh)
+  
+  <span class="cm">-- distância do centro do círculo a esse ponto</span>
+  <span class="kw">local</span> dx = cx - px
+  <span class="kw">local</span> dy = cy - py
+  
+  <span class="kw">return</span> dx*dx + dy*dy &lt; cr*cr
+<span class="kw">end</span>
+
+<span class="cm">-- uso: bala circular vs obstáculo retangular</span>
+<span class="kw">for</span> obs <span class="kw">in</span> <span class="fn">all</span>(obstaculos) <span class="kw">do</span>
+  <span class="kw">if</span> <span class="fn">colide_circ_rect</span>(bala.x, bala.y, <span class="num">4</span>,
+                      obs.x, obs.y, obs.w, obs.h) <span class="kw">then</span>
+    <span class="fn">del</span>(balas, bala)
+    obs.vida -= <span class="num">1</span>
+  <span class="kw">end</span>
+<span class="kw">end</span></pre></div>
+  <div class="ok">✓ A função <code style="font-family:var(--font-mono);font-size:12px">mid(v, min, max)</code> do Picotron faz o clamp perfeitamente — ela retorna o valor do meio entre os três, que é exatamente o que precisamos para encontrar o ponto mais próximo.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como calcular a resposta de colisão entre um círculo e um retângulo para empurrar o objeto para fora?')">Como responder a essa colisão e empurrar para fora? ↗</button>
+</div>
+
+<div id="s4" class="section">
+  <div class="sl"><div class="nc">5</div><h2>Colisão com o mapa (tiles)</h2></div>
+  <p>Para colidir com o cenário, você consulta as células do mapa via <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">mget()</code> e verifica o flag de solidez com <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">fget()</code>. Tiles marcados com flag 0 são sólidos.</p>
+  <div class="cb"><pre><span class="cm">-- tamanho do tile em pixels (padrão Picotron = 16)</span>
+<span class="kw">local</span> TS = <span class="num">16</span>
+
+<span class="cm">-- retorna true se o pixel (x,y) está dentro de um tile sólido</span>
+<span class="kw">function</span> <span class="fn">solido</span>(x, y)
+  <span class="kw">local</span> cx = <span class="fn">flr</span>(x / TS)
+  <span class="kw">local</span> cy = <span class="fn">flr</span>(y / TS)
+  <span class="kw">return</span> <span class="fn">fget</span>(<span class="fn">mget</span>(cx, cy), <span class="num">0</span>)
+<span class="kw">end</span>
+
+<span class="cm">-- testa os 4 cantos do retângulo do jogador</span>
+<span class="kw">function</span> <span class="fn">colide_mapa</span>(x, y, w, h)
+  <span class="kw">return</span> <span class="fn">solido</span>(x,     y)
+      <span class="kw">or</span> <span class="fn">solido</span>(x+w-<span class="num">1</span>, y)
+      <span class="kw">or</span> <span class="fn">solido</span>(x,     y+h-<span class="num">1</span>)
+      <span class="kw">or</span> <span class="fn">solido</span>(x+w-<span class="num">1</span>, y+h-<span class="num">1</span>)
+<span class="kw">end</span>
+
+<span class="cm">-- no GFX Editor: selecione o tile de parede</span>
+<span class="cm">-- e ligue o flag 0 (primeiro quadradinho)</span></pre></div>
+  <div style="margin-bottom:1rem">
+    <div class="ar" style="padding-top:0"><span class="an">mget(cx,cy)</span><span class="ad">Índice do sprite na célula (cx,cy) do mapa</span></div>
+    <div class="ar"><span class="an">fget(n, f)</span><span class="ad">Valor do flag f do sprite n — true se ligado</span></div>
+    <div class="ar"><span class="an">mset(cx,cy,n)</span><span class="ad">Troca o tile da célula — útil para blocos destrutíveis</span></div>
+    <div class="ar"><span class="an">flr(x/16)</span><span class="ad">Converte coordenada de pixel em índice de célula</span></div>
+  </div>
+  <div class="warn">⚠️ Lembre de marcar os tiles sólidos no GFX Editor antes de testar. Um tile sem flag 0 ligado não vai colidir, mesmo sendo visível na tela.</div>
+  <div class="tip">💡 Você pode usar outros flags (1–7) para outros significados: flag 1 = perigoso (espinhos), flag 2 = escada, flag 3 = água. Assim o mapa vira uma descrição completa do mundo.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como fazer blocos destrutíveis no mapa do Picotron usando mset?')">Como fazer blocos destrutíveis com mset? ↗</button>
+</div>
+
+<div id="s5" class="section">
+  <div class="sl"><div class="nc">6</div><h2>Resposta: separação de eixos</h2></div>
+  <p>Detectar colisão não basta — você precisa responder: mover o objeto para fora do obstáculo. A técnica mais sólida é <strong style="font-weight:500">separar os eixos</strong>: mova X e resolva, depois mova Y e resolva. Isso permite deslizar ao longo de paredes.</p>
+  <div class="cb"><pre><span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="cm">-- 1. calcular velocidade desejada</span>
+  vx, vy = <span class="num">0</span>, <span class="num">0</span>
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">0</span>) <span class="kw">then</span> vx = -<span class="num">2</span> <span class="kw">end</span>
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">1</span>) <span class="kw">then</span> vx =  <span class="num">2</span> <span class="kw">end</span>
+  vy += <span class="num">0.3</span>  <span class="cm">-- gravidade</span>
+
+  <span class="cm">-- 2. mover no eixo X e resolver colisão X</span>
+  px += vx
+  <span class="kw">if</span> <span class="fn">colide_mapa</span>(px, py, pw, ph) <span class="kw">then</span>
+    px -= vx   <span class="cm">-- desfaz só o movimento X</span>
+    vx = <span class="num">0</span>
+  <span class="kw">end</span>
+
+  <span class="cm">-- 3. mover no eixo Y e resolver colisão Y</span>
+  py += vy
+  <span class="kw">if</span> <span class="fn">colide_mapa</span>(px, py, pw, ph) <span class="kw">then</span>
+    py -= vy   <span class="cm">-- desfaz só o movimento Y</span>
+    vy = <span class="num">0</span>    <span class="cm">-- zera a velocidade vertical (pousa no chão)</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="cm">-- checar se está no chão (para liberar o pulo)</span>
+<span class="kw">function</span> <span class="fn">no_chao</span>()
+  <span class="kw">return</span> <span class="fn">solido</span>(px,      py+ph)
+      <span class="kw">or</span> <span class="fn">solido</span>(px+pw-<span class="num">1</span>, py+ph)
+<span class="kw">end</span></pre></div>
+  <div class="ok">✓ A separação de eixos é a razão pela qual o jogador consegue deslizar ao longo de uma parede em vez de travar. Se você mover X e Y juntos e reverter os dois ao colidir, o personagem para completamente.</div>
+  <div class="warn">⚠️ Se a velocidade em um frame ultrapassar o tamanho do tile (16px), o objeto pode atravessar paredes. Limite a velocidade máxima: <code style="font-family:var(--font-mono);font-size:12px">vy = min(vy, 12)</code>.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como fazer o jogador deslizar suavemente ao longo de uma parede em diagonal no Picotron?')">Como resolver colisão diagonal suavemente? ↗</button>
+</div>
+
+<div id="s6" class="section">
+  <div class="sl"><div class="nc">7</div><h2>Jogo de plataforma completo</h2></div>
+  <p>Juntando tudo: mapa com tiles sólidos, jogador com AABB, gravidade, pulo, e colisão por separação de eixos. Cole no <code style="font-family:var(--font-mono);font-size:13px;color:#0F6E56">main.lua</code> e desenhe alguns tiles sólidos no GFX/mapa:</p>
+  <div class="cb"><pre><span class="kw">local</span> TS = <span class="num">16</span>
+
+<span class="kw">function</span> <span class="fn">solido</span>(x, y)
+  <span class="kw">return</span> <span class="fn">fget</span>(<span class="fn">mget</span>(<span class="fn">flr</span>(x/TS), <span class="fn">flr</span>(y/TS)), <span class="num">0</span>)
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">colide_mapa</span>(x, y, w, h)
+  <span class="kw">return</span> <span class="fn">solido</span>(x,     y)     <span class="kw">or</span> <span class="fn">solido</span>(x+w-<span class="num">1</span>, y)
+      <span class="kw">or</span> <span class="fn">solido</span>(x,     y+h-<span class="num">1</span>) <span class="kw">or</span> <span class="fn">solido</span>(x+w-<span class="num">1</span>, y+h-<span class="num">1</span>)
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">no_chao</span>()
+  <span class="kw">return</span> <span class="fn">solido</span>(px, py+ph) <span class="kw">or</span> <span class="fn">solido</span>(px+pw-<span class="num">1</span>, py+ph)
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_init</span>()
+  px, py = <span class="num">32</span>, <span class="num">32</span>
+  pw, ph = <span class="num">12</span>, <span class="num">14</span>  <span class="cm">-- hitbox menor que o sprite</span>
+  vx, vy = <span class="num">0</span>, <span class="num">0</span>
+  
+  <span class="cm">-- inimigos como tabela de objetos</span>
+  inimigos = {}
+  <span class="fn">add</span>(inimigos, {x=<span class="num">200</span>, y=<span class="num">100</span>, r=<span class="num">8</span>, dir=<span class="num">1</span>})
+  <span class="fn">add</span>(inimigos, {x=<span class="num">320</span>, y=<span class="num">150</span>, r=<span class="num">8</span>, dir=-<span class="num">1</span>})
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_update</span>()
+  <span class="cm">-- input</span>
+  vx = <span class="num">0</span>
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">0</span>) <span class="kw">then</span> vx = -<span class="num">2</span> <span class="kw">end</span>
+  <span class="kw">if</span> <span class="fn">btn</span>(<span class="num">1</span>) <span class="kw">then</span> vx =  <span class="num">2</span> <span class="kw">end</span>
+  <span class="kw">if</span> <span class="fn">btnp</span>(<span class="num">4</span>) <span class="kw">and</span> <span class="fn">no_chao</span>() <span class="kw">then</span> vy = -<span class="num">4</span> <span class="kw">end</span>
+  
+  <span class="cm">-- gravidade (com velocidade máxima)</span>
+  vy = <span class="fn">min</span>(vy + <span class="num">0.3</span>, <span class="num">8</span>)
+  
+  <span class="cm">-- mover + resolver X</span>
+  px += vx
+  <span class="kw">if</span> <span class="fn">colide_mapa</span>(px, py, pw, ph) <span class="kw">then</span> px -= vx; vx = <span class="num">0</span> <span class="kw">end</span>
+  
+  <span class="cm">-- mover + resolver Y</span>
+  py += vy
+  <span class="kw">if</span> <span class="fn">colide_mapa</span>(px, py, pw, ph) <span class="kw">then</span> py -= vy; vy = <span class="num">0</span> <span class="kw">end</span>
+  
+  <span class="cm">-- inimigos: patrulha + colisão círculo×círculo</span>
+  <span class="kw">for</span> e <span class="kw">in</span> <span class="fn">all</span>(inimigos) <span class="kw">do</span>
+    e.x += e.dir
+    <span class="kw">if</span> e.x &lt; <span class="num">16</span> <span class="kw">or</span> e.x > <span class="num">460</span> <span class="kw">then</span> e.dir = -e.dir <span class="kw">end</span>
+    
+    <span class="kw">local</span> cx = px + pw/<span class="num">2</span>
+    <span class="kw">local</span> cy = py + ph/<span class="num">2</span>
+    <span class="kw">local</span> dx = cx - e.x
+    <span class="kw">local</span> dy = cy - e.y
+    <span class="kw">if</span> dx*dx + dy*dy &lt; (e.r+<span class="num">8</span>)*(e.r+<span class="num">8</span>) <span class="kw">then</span>
+      <span class="fn">del</span>(inimigos, e)
+      <span class="fn">sfx</span>(<span class="num">0</span>)
+    <span class="kw">end</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="kw">function</span> <span class="fn">_draw</span>()
+  <span class="fn">cls</span>(<span class="num">1</span>)
+  <span class="fn">map</span>()
+  <span class="kw">for</span> e <span class="kw">in</span> <span class="fn">all</span>(inimigos) <span class="kw">do</span>
+    <span class="fn">circfill</span>(e.x, e.y, e.r, <span class="num">8</span>)
+  <span class="kw">end</span>
+  <span class="fn">rectfill</span>(px, py, px+pw-<span class="num">1</span>, py+ph-<span class="num">1</span>, <span class="num">12</span>)
+  <span class="fn">print</span>(<span class="str">"inimigos: "</span>..<span class="fn">count</span>(inimigos), <span class="num">10</span>, <span class="num">10</span>, <span class="num">7</span>)
+<span class="kw">end</span></pre></div>
+  <div class="ok">✓ Este código combina as três técnicas: colisão AABB com o mapa (cenário), colisão círculo×círculo com inimigos, e separação de eixos para a resposta física.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como adicionar knockback (empurrão) quando o jogador é atingido por um inimigo no Picotron?')">Como adicionar knockback ao ser atingido? ↗</button>
+</div>
+
+<div class="nf">
+  <button class="nb" id="btnPrev" onclick="changeStep(-1)" disabled>← anterior</button>
+  <span style="font-size:12px;color:var(--text-muted);align-self:center;font-family:var(--font-sans,sans-serif)" id="stepInd">1 de 7</span>
+  <button class="nb" id="btnNext" onclick="changeStep(1)">próximo →</button>
+</div>
+</div>
+
+<script>
+let cur=0;const total=7;
+function goTo(n){
+  document.getElementById('s'+cur).classList.remove('active');
+  document.querySelectorAll('.step-btn')[cur].classList.remove('active');
+  cur=n;
+  document.getElementById('s'+cur).classList.add('active');
+  document.querySelectorAll('.step-btn')[cur].classList.add('active');
+  document.getElementById('btnPrev').disabled=cur===0;
+  document.getElementById('btnNext').disabled=cur===total-1;
+  document.getElementById('stepInd').textContent=(cur+1)+' de '+total;
+  drawCanvas();
+}
+function changeStep(d){const n=cur+d;if(n>=0&&n<total)goTo(n);}
+
+function isDark(){return window.matchMedia('(prefers-color-scheme: dark)').matches;}
+
+function getColors(){
+  const dk=isDark();
+  return {
+    bg: dk?'#1a1a28':'#f0f4ff',
+    tile: dk?'#3C3489':'#B5D4F4',
+    tileBorder: dk?'#534AB7':'#185FA5',
+    grid: dk?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)',
+    player: dk?'#5DCAA5':'#0F6E56',
+    enemy: dk?'#F0997B':'#993C1D',
+    hit: dk?'#F09595':'#E24B4A',
+    ok: dk?'#5DCAA5':'#1D9E75',
+    txt: dk?'rgba(255,255,255,0.7)':'rgba(0,0,0,0.5)',
+    label: dk?'#9FE1CB':'#085041',
+    aabbLine: dk?'rgba(93,202,165,0.5)':'rgba(15,110,86,0.4)',
+  };
+}
+
+function drawCanvas(){
+  const id='cv'+cur;
+  const cv=document.getElementById(id);
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const C=getColors();
+  const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+
+  if(cur===0){
+    const items=[
+      {x:100,y:80,type:'circ',r:30,label:'círculo\n(projétil)'},
+      {x:320,y:80,type:'rect',w:80,h:50,label:'AABB\n(jogador)'},
+      {x:540,y:80,type:'tile',label:'tile sólido\n(mapa)'},
+    ];
+    items.forEach(it=>{
+      ctx.fillStyle=C.player;ctx.strokeStyle=C.tileBorder;ctx.lineWidth=1.5;
+      if(it.type==='circ'){
+        ctx.beginPath();ctx.arc(it.x,it.y,it.r,0,Math.PI*2);
+        ctx.globalAlpha=0.25;ctx.fill();ctx.globalAlpha=1;ctx.stroke();
+        const cx=it.x,cy=it.y,r=it.r;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r,cy);
+        ctx.strokeStyle=C.label;ctx.lineWidth=1;ctx.stroke();
+        ctx.fillStyle=C.label;ctx.font='11px monospace';ctx.fillText('r',cx+r/2-3,cy-4);
+      } else if(it.type==='rect'){
+        const rx=it.x-it.w/2,ry=it.y-it.h/2;
+        ctx.strokeStyle=C.tileBorder;ctx.lineWidth=1.5;
+        ctx.globalAlpha=0.2;ctx.fillStyle=C.player;ctx.fillRect(rx,ry,it.w,it.h);
+        ctx.globalAlpha=1;ctx.strokeRect(rx,ry,it.w,it.h);
+        ctx.fillStyle=C.label;ctx.font='10px monospace';
+        ctx.fillText('w',rx+it.w/2-5,ry-4);
+        ctx.fillText('h',rx+it.w+4,ry+it.h/2+4);
+      } else {
+        const sz=36,tx=it.x-sz/2,ty=it.y-sz/2;
+        ctx.fillStyle=C.tile;ctx.strokeStyle=C.tileBorder;ctx.lineWidth=1;
+        ctx.fillRect(tx,ty,sz,sz);ctx.strokeRect(tx+0.5,ty+0.5,sz-1,sz-1);
+        ctx.fillStyle=C.label;ctx.font='10px monospace';ctx.fillText('F0',tx+8,ty+22);
+      }
+      ctx.fillStyle=C.txt;ctx.font='12px sans-serif';ctx.textAlign='center';
+      it.label.split('\n').forEach((l,i)=>ctx.fillText(l,it.x,it.y+it.r+18+(i*15)||it.y+(it.h||36)/2+30+(i*15)));
+      ctx.textAlign='left';
+    });
+  }
+
+  if(cur===1){
+    const t=Date.now()/1000;
+    const a={x:180,y:80,r:35};
+    const bx=420+Math.cos(t)*60,by=80+Math.sin(t)*30;
+    const b={x:bx,y:by,r:28};
+    const dx=b.x-a.x,dy=b.y-a.y,dist=Math.sqrt(dx*dx+dy*dy);
+    const hit=dist<a.r+b.r;
+    const C2=hit?C.hit:C.ok;
+    [a,b].forEach((c,i)=>{
+      ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+      ctx.fillStyle=hit?C.hit:C.player;ctx.globalAlpha=0.2;ctx.fill();
+      ctx.globalAlpha=1;ctx.strokeStyle=C2;ctx.lineWidth=2;ctx.stroke();
+    });
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+    ctx.strokeStyle=C2;ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle=C.label;ctx.font='12px monospace';ctx.textAlign='center';
+    ctx.fillText('dist='+Math.round(dist),W/2,H-16);
+    ctx.fillText('r1+r2='+(a.r+b.r),(a.x+b.x)/2,(a.y+b.y)/2-10);
+    ctx.fillStyle=hit?C.hit:C.ok;
+    ctx.fillText(hit?'COLISAO!':'sem colisao',W/2,20);
+    ctx.textAlign='left';
+    requestAnimationFrame(()=>{if(cur===1)drawCanvas();});
+  }
+
+  if(cur===2){
+    const t=Date.now()/1000;
+    const a={x:160,y:60,w:90,h:60};
+    const bx=260+Math.cos(t*0.8)*120,by=60+Math.sin(t*1.1)*50;
+    const b={x:bx,y:by,w:80,h:55};
+    const hit=a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+    [a,b].forEach(r=>{
+      ctx.fillStyle=hit?C.hit:C.player;ctx.globalAlpha=0.2;
+      ctx.fillRect(r.x,r.y,r.w,r.h);ctx.globalAlpha=1;
+      ctx.strokeStyle=hit?C.hit:C.ok;ctx.lineWidth=2;
+      ctx.strokeRect(r.x,r.y,r.w,r.h);
+    });
+    ctx.fillStyle=hit?C.hit:C.ok;ctx.font='13px monospace';ctx.textAlign='center';
+    ctx.fillText(hit?'AABB: COLISAO!':'AABB: sem colisao',W/2,H-16);
+    ctx.textAlign='left';
+    requestAnimationFrame(()=>{if(cur===2)drawCanvas();});
+  }
+
+  if(cur===3){
+    const t=Date.now()/1000;
+    const rect={x:220,y:40,w:180,h:100};
+    const cx=320+Math.cos(t)*160,cy=90+Math.sin(t*1.3)*70;
+    const cr=28;
+    const npx=Math.max(rect.x,Math.min(cx,rect.x+rect.w));
+    const npy=Math.max(rect.y,Math.min(cy,rect.y+rect.h));
+    const dx=cx-npx,dy=cy-npy;
+    const dist2=dx*dx+dy*dy;
+    const hit=dist2<cr*cr;
+    ctx.fillStyle=hit?C.hit:C.player;ctx.globalAlpha=0.15;
+    ctx.fillRect(rect.x,rect.y,rect.w,rect.h);ctx.globalAlpha=1;
+    ctx.strokeStyle=hit?C.hit:C.ok;ctx.lineWidth=2;
+    ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
+    ctx.beginPath();ctx.arc(cx,cy,cr,0,Math.PI*2);
+    ctx.fillStyle=hit?C.hit:C.player;ctx.globalAlpha=0.2;ctx.fill();
+    ctx.globalAlpha=1;ctx.strokeStyle=hit?C.hit:C.ok;ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.arc(npx,npy,4,0,Math.PI*2);
+    ctx.fillStyle=C.enemy;ctx.fill();
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(npx,npy);
+    ctx.strokeStyle=C.txt;ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=hit?C.hit:C.ok;ctx.font='13px monospace';ctx.textAlign='center';
+    ctx.fillText(hit?'COLISAO!':'ponto mais proximo: sem colisao',W/2,H-16);
+    ctx.textAlign='left';
+    requestAnimationFrame(()=>{if(cur===3)drawCanvas();});
+  }
+
+  if(cur>=4){
+    const TS=32,COLS=20,ROWS=5;
+    const map=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,0,0,0,1,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      const x=c*TS,y=r*TS;
+      if(map[r]&&map[r][c]===1){ctx.fillStyle=C.tile;ctx.fillRect(x,y,TS,TS);ctx.strokeStyle=C.tileBorder;ctx.lineWidth=0.5;ctx.strokeRect(x+.5,y+.5,TS-1,TS-1);}
+      else{ctx.strokeStyle=C.grid;ctx.lineWidth=.5;ctx.strokeRect(x+.5,y+.5,TS-1,TS-1);}
+    }
+    const px2=TS*2+4,py2=TS*2+4,pw2=TS-8,ph2=TS-8;
+    ctx.fillStyle=C.player;ctx.globalAlpha=0.85;ctx.fillRect(px2,py2,pw2,ph2);ctx.globalAlpha=1;
+    ctx.strokeStyle=C.ok;ctx.lineWidth=1.5;ctx.strokeRect(px2+.75,py2+.75,pw2-1.5,ph2-1.5);
+    const corners=[[px2,py2],[px2+pw2-1,py2],[px2,py2+ph2-1],[px2+pw2-1,py2+ph2-1]];
+    corners.forEach(([cx2,cy2])=>{
+      ctx.beginPath();ctx.arc(cx2,cy2,3,0,Math.PI*2);
+      ctx.fillStyle=C.ok;ctx.fill();
+    });
+    ctx.fillStyle=C.txt;ctx.font='11px monospace';ctx.textAlign='center';
+    ctx.fillText('4 cantos testados via fget(mget(cx,cy),0)',W/2,H-8);
+    ctx.textAlign='left';
+  }
+}
+
+drawCanvas();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawCanvas);
+</script>
