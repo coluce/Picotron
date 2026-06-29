@@ -1,1 +1,1 @@
---[[pod,file_item={["drive.loc"]={x=-21,y=16},["picovania-288.p64"]={x=-22,y=78},["readme.txt"]={x=-23,y=133}},modified="2025-07-06 18:14:48"]]
+--[[pod,file_item={["drive.loc"]={x=-21,y=16},exemplos={x=-21,y=56},projetos={x=-21,y=96},["rallytron-8.p64.png"]={x=142,y=111},["readme.txt"]={x=-23,y=133},["sakura-4.p64.png"]={x=140,y=28},["solitaire_suite-4.p64.png"]={x=140,y=71},tutorial={x=-21,y=176}},modified="2026-06-29 00:29:56"]]
