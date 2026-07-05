@@ -5,16 +5,23 @@ version 2
 :: map/
 :: sfx/
 :: main.lua
---[[pod_format="raw",created="2025-12-26 23:52:43",modified="2026-07-05 16:52:37",revision=73]]
+--[[pod_format="raw",created="2025-12-26 23:52:43",modified="2026-07-05 17:08:46",revision=86]]
 function _init()
   player={
     spr_id = 21,
     x = 110,
     y = 80,
-    vel = 1,  -- velocidade de movimento
-    dir = 1,   -- 1 = direita, -1 = esquerda    
+    vel = 1, -- velocidade de movimento
+    dir = 1, -- 1 = direita, -1 = esquerda    
     life=3
   }
+  
+  itens = {
+    { x=200, y=80,  spr_id=44,  efeito= 1, sfx_id=0 },  -- cura: +1 vida
+    { x=280, y=112, spr_id=45,  efeito=-1, sfx_id=1 },  -- dano: -1 vida
+    { x=320, y=64,  spr_id=44,  efeito= 1, sfx_id=0 },  -- cura: +1
+  }  
+  
 end
 
 function _update()
@@ -39,6 +46,18 @@ function _update()
 
   player.x = mid(10, player.x, 470)
   player.y = mid(10, player.y, 260)
+  
+  for item in all(itens) do
+    if colide_aabb(player.x, player.y, 8, 8, item.x, item.y, 8, 8) then
+      player.life += item.efeito  -- aplica +1 ou -1
+      sfx(item.sfx_id)           -- toca o som do item
+      del(itens, item)           -- remove o item do mundo
+    end
+  end
+
+  -- garantir que life fique entre 0 e um maximo
+  player.life = mid(0, player.life, 9)  
+  
 end
 
 function _draw()
@@ -50,6 +69,10 @@ function _draw()
   -- cw,ch = quantidade de celulas a desenhar
   --map(0, 0, 0, 0, 30, 17)
   map()
+  
+  for item in all(itens) do
+    spr(item.spr_id, item.x, item.y)
+  end  
   
   -- desenhar o jogador POR CIMA do mapa
   spr(player.spr_id, player.x, player.y, player.dir == -1)
@@ -77,23 +100,31 @@ function colide_mapa(x, y, w, h)
       or solido(x,     y+h-1)
       or solido(x+w-1, y+h-1)
 end
+
+function colide_aabb(ax, ay, aw, ah, bx, by, bw, bh)
+  return ax < bx+bw
+     and ax+aw > bx
+     and ay < by+bh
+     and ay+ah > by
+end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 16:52:37",runtime=27,workspaces={{location="main.lua#49",workspace_index=1},{location="gfx/0.gfx#5",workspace_index=2},{location="map/0.map",workspace_index=3}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 17:21:02",runtime=27,workspaces={{location="main.lua#45",workspace_index=1},{location="gfx/0.gfx#45",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 16:52:37"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 17:21:02"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNi0w
-Ny0wMyAyMzoyMTowNiIscmV2aXNpb249NzBdXWx6NADEAQAADzIAAPMhe1swXT17Ym1wPXB4dQBD
+Ny0wNSAxNzowMDowMSIscmV2aXNpb249NzFdXWx6NADpAQAAMTIAAPMhe1swXT17Ym1wPXB4dQBD
 IAgIBPACBxAHQBdQF0AHEAfwAixmbGFncz0wLHBhbl94CADLeT0wLHpvb209OH0sPgAfMDEAHPMI
 cFUwFQAVEAUwBVAVMAUQBVAVQAUABQBGAB8xdwAWD6gATf8IEDYgBjAGAAZQFlAWMAYAFlAWUAYA
 VgB3AB35AAEGADYQBkAGAAYABiAGAAgAD08AH6EABoA2EAYwBhBWBgAwNgAGCAAvMDZIABpfEBAE
 8PAxAEpDCAgEUN8BL0Al5wErD9kAfkKQJgcgfgEBggFfBwYQVoDWAB3PBQZQBgAGMAZAFvAF4QB_
 DnQBMy43NTQALy0xNQAE3BUABTAFAAVABXAF8BYPAQ5AAA_mAC-wDCAmMAYHBgcwBgUGBUAmUAUw
 BgUmAAcGACYAB18DHyAmAR4PMQDh8AkSFRA1IAWABeAFsDUAJXAFQAXgBWBFAGXHAZ9QBfABNcAF
-8CiGAB4PMQD--8kAFwj-CQgQCCAIPxgIAH4CXggAAj4IIAIeCEAYoHkAHg8xAP--------------
---------------------------------------_UUG09OH19
+8CiGAB4PMQD--8kAFwj-CQgQCCAIPxgIAH4CXggAAj4IIAIeCEAYoEgAHNHwAjggDxgAGAAOEA4w
+BAA-ID6QRAAdIAoyRAAuEgBAAA8uARQPMQD-----------------------------------------
+------------MlBtPTh9fQ==
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 16:52:37"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 17:21:02"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNi0w
 Ny0wMyAyMzoxNzoxMyIscmV2aXNpb249MzVdXWx6NACzAAAA8AAAAPIke3tibXA9cHh1AEyAICAA
@@ -101,11 +132,12 @@ ywAAABPABApgAAcAAApgABOgFgAAAAoAABsABAAAABtgAArAEgCVAQAAAA4AAwAAEgABIQAnAAAS
 AB8GDAACgBNgAAqgAAUABgAxAgACGAATGmYAEaAoAAYSAAYeAPETE2ACCqAAEwD-AAD-DCxoaWRk
 ZW49ZmFsc2UscGFuX3g9MAgA4nk9LTMyLHRpbGVfaD04CQDAdz04LHpvb209Mn19
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 16:52:37"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 17:21:02"]]
 :: sfx/0.sfx
-b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0w
-Ny0zMSAwODozMDoyOCIscmV2aXNpb249MF1dbHo0AKAAAAALCgAA-zBweHUAAygAAAQABA9AEAIO
+b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNi0w
+Ny0wNSAxNzoyMTowMiIscmV2aXNpb249NF1dbHo0AMoAAAA-CgAA-zBweHUAAygAAAQABA9AEAIO
 AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOv-J6oBEAYP
 MBABIAEgAfAAAhACDhABIA8hIAEwD0Dwww8oD--wxg-4Cg--D4AP9w8NAfAJARAGDjAA------_9
-H-8BAKzPyA9AAA8QQP--sPD-AQD-6lD-----KQ==
+H-8BAKzzCMgPQAAPEEAPOw9L--8uEP0uHyD9LvBwFgDlQg8vDx39LSH9LS8g-S0XAGMoDy-9Lhcs
+AB--AQD-51D-----lg==
 :: [eoc]
