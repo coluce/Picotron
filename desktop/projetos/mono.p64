@@ -5,41 +5,44 @@ version 2
 :: map/
 :: sfx/
 :: main.lua
---[[pod_format="raw",created="2025-12-26 23:52:43",modified="2026-07-02 01:09:38",revision=49]]
+--[[pod_format="raw",created="2025-12-26 23:52:43",modified="2026-07-05 16:52:37",revision=73]]
 function _init()
-  spr_id = 21
-  x = 110
-  y = 80
-  vel = 1  -- velocidade de movimento
-  dir = 1   -- 1 = direita, -1 = esquerda
+  player={
+    spr_id = 21,
+    x = 110,
+    y = 80,
+    vel = 1,  -- velocidade de movimento
+    dir = 1,   -- 1 = direita, -1 = esquerda    
+    life=3
+  }
 end
 
 function _update()
   -- testar X separadamente
-  local vx = x
-  local vy = y
+  local vx = player.x
+  local vy = player.y
   
-  if btn(0) then vx -= vel; dir = -1 end
-  if btn(1) then vx += vel; dir = 1 end
-  if btn(2) then vy -= vel end
-  if btn(3) then vy += vel end
+  if btn(0) then vx -= player.vel; player.dir = -1 end
+  if btn(1) then vx += player.vel; player.dir = 1 end
+  if btn(2) then vy -= player.vel end
+  if btn(3) then vy += player.vel end
 
   -- resolver X independente de Y
-  if not colide_mapa(vx, y, 8, 8) then
-    x = vx
+  if not colide_mapa(vx, player.y, 8, 8) then
+    player.x = vx
   end
 
   -- resolver Y independente de X
-  if not colide_mapa(x, vy, 8, 8) then
-    y = vy
+  if not colide_mapa(player.x, vy, 8, 8) then
+    player.y = vy
   end
 
-  x = mid(10, x, 470)
-  y = mid(10, y, 260)
+  player.x = mid(10, player.x, 470)
+  player.y = mid(10, player.y, 260)
 end
 
 function _draw()
-  cls(1)
+  cls(0)
   
   -- map(cx, cy, sx, sy, cw, ch)
   -- cx,cy = celula inicial do mapa
@@ -49,7 +52,14 @@ function _draw()
   map()
   
   -- desenhar o jogador POR CIMA do mapa
-  spr(spr_id, x, y, dir == -1)
+  spr(player.spr_id, player.x, player.y, player.dir == -1)
+  
+  -- desenhar UI com a vida do jogador
+  local pos = 0
+  for i=1, player.life do 
+    pos+= 10  
+    spr(43, pos, 10)
+  end
   
 end
 
@@ -68,31 +78,30 @@ function colide_mapa(x, y, w, h)
       or solido(x+w-1, y+h-1)
 end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-03 22:54:57",runtime=27,workspaces={{location="main.lua#41",workspace_index=1},{location="gfx/0.gfx#14",workspace_index=2},{location="map/0.map",workspace_index=3}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 16:52:37",runtime=27,workspaces={{location="main.lua#49",workspace_index=1},{location="gfx/0.gfx#5",workspace_index=2},{location="map/0.map",workspace_index=3}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-03 22:54:57"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 16:52:37"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNi0w
-Ny0wMyAyMjo1NDo1NyIscmV2aXNpb249NTJdXWx6NADlAQAASjIAAPMhe1swXT17Ym1wPXB4dQBD
-IAgIBPACBxAHQBdQF0AHEAfwAixmbGFncz0wLHBhbl94CADKeT0wLHpvb209OH0sPgCzdgBGAAYg
-BkAG8BY6AB8xOgAUchYAFiBWEAYCAP8AMAZQFjAGEAZQFkAGAAYASwAco-AIBgAGEAYAFiAIAF8A
-BgB2cEUAHR8w_wAcoBA2IAYwBgAGUBa8AJ8AFlAWUAYAVgBGABxx8AEGADYQBvcAEAbAAAgIAA9P
-AB9AAAaANk8BIRBWBgAQNhABTzAGMDZIABpfEBAE8PAxAEpDCAgEUPMBL0Am_wEpcAAGABYwFlDm
-AEAWUCZACAABBgAeIEgAD-AAbEKQJgcglQEBmQFfBwYQVoDtABze8AUGUAYABjAGQBbwBX8AD_EA
-bEIgBhAWfQMQIIEBjQYANkAGcBbw0gEzLjc1SgAvLTEcBAYBWgMgABYcBI9AFkAGcAbwBkgACQ-E
-ADZhJjAGBwYH1wNxJqAGACYABwUAAJEDHyBBAR4PMQDh-xQStYAF4AWwdXAFQAXgBWBFAGVABXAF
-UAVwBTB1wAXwDTXwB4QAHg8xAP--------------------------------------------------
-------_nUG09OH19
+Ny0wMyAyMzoyMTowNiIscmV2aXNpb249NzBdXWx6NADEAQAADzIAAPMhe1swXT17Ym1wPXB4dQBD
+IAgIBPACBxAHQBdQF0AHEAfwAixmbGFncz0wLHBhbl94CADLeT0wLHpvb209OH0sPgAfMDEAHPMI
+cFUwFQAVEAUwBVAVMAUQBVAVQAUABQBGAB8xdwAWD6gATf8IEDYgBjAGAAZQFlAWMAYAFlAWUAYA
+VgB3AB35AAEGADYQBkAGAAYABiAGAAgAD08AH6EABoA2EAYwBhBWBgAwNgAGCAAvMDZIABpfEBAE
+8PAxAEpDCAgEUN8BL0Al5wErD9kAfkKQJgcgfgEBggFfBwYQVoDWAB3PBQZQBgAGMAZAFvAF4QB_
+DnQBMy43NTQALy0xNQAE3BUABTAFAAVABXAF8BYPAQ5AAA_mAC-wDCAmMAYHBgcwBgUGBUAmUAUw
+BgUmAAcGACYAB18DHyAmAR4PMQDh8AkSFRA1IAWABeAFsDUAJXAFQAXgBWBFAGXHAZ9QBfABNcAF
+8CiGAB4PMQD--8kAFwj-CQgQCCAIPxgIAH4CXggAAj4IIAIeCEAYoHkAHg8xAP--------------
+--------------------------------------_UUG09OH19
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-03 22:54:57"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 16:52:37"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNi0w
-Ny0wMyAyMjo0OToyNyIscmV2aXNpb249MzFdXWx6NACxAAAA8AAAAPIke3tibXA9cHh1AEyAICAA
-ywAAABPABAMAAAcAAAMAABOgFgAAAAoAABsABAAAABtgAAsAEgBQAQAAAA4jAAUSAAEhACcAABIA
-HwYMAAIgE2A9ACAFAAYAMQIAAhgAExpmABGgKAAGEgAGHgDxExIAAgEAABMA-wAA-wwsaGlkZGVu
-PWZhbHNlLHBhbl94PTAIAOJ5PS0zMix0aWxlX2g9OAkAwHc9OCx6b29tPTJ9fQ==
+Ny0wMyAyMzoxNzoxMyIscmV2aXNpb249MzVdXWx6NACzAAAA8AAAAPIke3tibXA9cHh1AEyAICAA
+ywAAABPABApgAAcAAApgABOgFgAAAAoAABsABAAAABtgAArAEgCVAQAAAA4AAwAAEgABIQAnAAAS
+AB8GDAACgBNgAAqgAAUABgAxAgACGAATGmYAEaAoAAYSAAYeAPETE2ACCqAAEwD-AAD-DCxoaWRk
+ZW49ZmFsc2UscGFuX3g9MAgA4nk9LTMyLHRpbGVfaD04CQDAdz04LHpvb209Mn19
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-03 22:54:57"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 16:52:37"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNS0w
 Ny0zMSAwODozMDoyOCIscmV2aXNpb249MF1dbHo0AKAAAAALCgAA-zBweHUAAygAAAQABA9AEAIO
