@@ -5,7 +5,7 @@ version 2
 :: map/
 :: sfx/
 :: main.lua
---[[pod_format="raw",created="2025-12-26 23:52:43",modified="2026-07-05 17:08:46",revision=86]]
+--[[pod_format="raw",created="2025-12-26 23:52:43",modified="2026-07-05 18:46:47",revision=91]]
 function _init()
   player={
     spr_id = 21,
@@ -13,7 +13,9 @@ function _init()
     y = 80,
     vel = 1, -- velocidade de movimento
     dir = 1, -- 1 = direita, -1 = esquerda    
-    life=3
+    life=3,
+    movendo = false,   -- esta se movendo?
+    passo_timer = 0    -- contador de frames
   }
   
   itens = {
@@ -28,11 +30,12 @@ function _update()
   -- testar X separadamente
   local vx = player.x
   local vy = player.y
+  player.movendo = false
   
-  if btn(0) then vx -= player.vel; player.dir = -1 end
-  if btn(1) then vx += player.vel; player.dir = 1 end
-  if btn(2) then vy -= player.vel end
-  if btn(3) then vy += player.vel end
+  if btn(0) then vx -= player.vel; player.dir = -1; player.movendo = true end
+  if btn(1) then vx += player.vel; player.dir = 1; player.movendo = true end
+  if btn(2) then vy -= player.vel; player.movendo = true end
+  if btn(3) then vy += player.vel; player.movendo = true end
 
   -- resolver X independente de Y
   if not colide_mapa(vx, player.y, 8, 8) then
@@ -46,6 +49,17 @@ function _update()
 
   player.x = mid(10, player.x, 470)
   player.y = mid(10, player.y, 260)
+  
+  -- som de passos
+  if player.movendo then
+    player.passo_timer -= 1
+    if player.passo_timer <= 0 then
+      sfx(2)                   -- sfx 2 = som de passo
+      player.passo_timer = 16  -- intervalo: toca a cada 16 frames
+    end
+  else
+    player.passo_timer = 0     -- zera ao parar, proximo passo eh imediato
+  end  
   
   for item in all(itens) do
     if colide_aabb(player.x, player.y, 8, 8, item.x, item.y, 8, 8) then
@@ -108,9 +122,9 @@ function colide_aabb(ax, ay, aw, ah, bx, by, bw, bh)
      and ay+ah > by
 end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 17:21:02",runtime=27,workspaces={{location="main.lua#45",workspace_index=1},{location="gfx/0.gfx#45",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 18:47:37",runtime=27,workspaces={{location="main.lua#53",workspace_index=1},{location="gfx/0.gfx#45",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 17:21:02"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 18:47:37"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNi0w
 Ny0wNSAxNzowMDowMSIscmV2aXNpb249NzFdXWx6NADpAQAAMTIAAPMhe1swXT17Ym1wPXB4dQBD
@@ -124,7 +138,7 @@ BgUmAAcGACYAB18DHyAmAR4PMQDh8AkSFRA1IAWABeAFsDUAJXAFQAXgBWBFAGXHAZ9QBfABNcAF
 BAA-ID6QRAAdIAoyRAAuEgBAAA8uARQPMQD-----------------------------------------
 ------------MlBtPTh9fQ==
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 17:21:02"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 18:47:37"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNi0w
 Ny0wMyAyMzoxNzoxMyIscmV2aXNpb249MzVdXWx6NACzAAAA8AAAAPIke3tibXA9cHh1AEyAICAA
@@ -132,12 +146,12 @@ ywAAABPABApgAAcAAApgABOgFgAAAAoAABsABAAAABtgAArAEgCVAQAAAA4AAwAAEgABIQAnAAAS
 AB8GDAACgBNgAAqgAAUABgAxAgACGAATGmYAEaAoAAYSAAYeAPETE2ACCqAAEwD-AAD-DCxoaWRk
 ZW49ZmFsc2UscGFuX3g9MAgA4nk9LTMyLHRpbGVfaD04CQDAdz04LHpvb209Mn19
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 17:21:02"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 18:47:37"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNi0w
-Ny0wNSAxNzoyMTowMiIscmV2aXNpb249NF1dbHo0AMoAAAA-CgAA-zBweHUAAygAAAQABA9AEAIO
-AAGgASACoA4ADxAADfDKAQIDQA8PkAQFBgdADJAICQoLQAyQDwwPDQ8ODEAM8P8BAOv-J6oBEAYP
-MBABIAEgAfAAAhACDhABIA8hIAEwD0Dwww8oD--wxg-4Cg--D4AP9w8NAfAJARAGDjAA------_9
-H-8BAKzzCMgPQAAPEEAPOw9L--8uEP0uHyD9LvBwFgDlQg8vDx39LSH9LS8g-S0XAGMoDy-9Lhcs
-AB--AQD-51D-----lg==
+Ny0wNSAxODo0NzozNyIscmV2aXNpb249MTBdXWx6NADLAAAAQAoAAP8wcHh1AAMoAAAEAAQPQBAC
+DgABoAEgAqAOAA8QAA3wygECA0APD5AEBQYHQAyQCAkKC0AMkA8MDw0PDgxADPD-AQDr-yeqARAG
+DzAQASABIAHwAAIQAg4QASAPISABMA9A8MMPKA--8MYP_AoP-w_AD-cPDQHwCQEQBg4wAP------
+vR--AQCs8wjID0AADxBADzsPS---LhD9Lh8g-S7wcBYA5UIPLw8d-S0h-S0vIP0tFwBzEw8WDP0t
+IBYAH-8BAP-nUP----_W
 :: [eoc]
