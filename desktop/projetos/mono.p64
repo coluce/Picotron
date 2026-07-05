@@ -4,158 +4,106 @@ version 2
 :: gfx/
 :: map/
 :: sfx/
-:: main.lua
---[[pod_format="raw",created="2025-12-26 23:52:43",modified="2026-07-05 19:46:31",revision=95]]
-function _init()
-  player={
-    spr_id = 21,
-    x = 110,
-    y = 80,
-    vel = 1, -- velocidade de movimento
-    dir = 1, -- 1 = direita, -1 = esquerda    
-    life=3,
-    movendo = false,   -- esta se movendo?
-    passo_timer = 0    -- contador de frames
-  }
-  
-  itens = {
-    { x=210, y=80,  spr_id=44,  efeito= 1, sfx_id=0 },  -- cura: +1 vida
-    { x=280, y=112, spr_id=45,  efeito=-1, sfx_id=1 },  -- dano: -1 vida
-    { x=320, y=64,  spr_id=44,  efeito= 1, sfx_id=0 },  -- cura: +1
-  }  
-  
-end
-
-function _update()
-  -- testar X separadamente
-  local vx = player.x
-  local vy = player.y
-  player.movendo = false
-  
-  if btn(0) then vx -= player.vel; player.dir = -1; player.movendo = true end
-  if btn(1) then vx += player.vel; player.dir = 1; player.movendo = true end
-  if btn(2) then vy -= player.vel; player.movendo = true end
-  if btn(3) then vy += player.vel; player.movendo = true end
-
-  -- resolver X independente de Y
-  if not colide_mapa(vx, player.y, 8, 8) then
-    player.x = vx
-  end
-
-  -- resolver Y independente de X
-  if not colide_mapa(player.x, vy, 8, 8) then
-    player.y = vy
-  end
-
-  -- deixar jogador dentro da tela
-  player.x = mid(10, player.x, 470)
-  player.y = mid(10, player.y, 260)
-  
-  -- som de passos
-  if player.movendo then
-    player.passo_timer -= 1
-    if player.passo_timer <= 0 then
-      sfx(2)                   -- sfx 2 = som de passo
-      player.passo_timer = 16  -- intervalo: toca a cada 16 frames
-    end
-  else
-    player.passo_timer = 0     -- zera ao parar, proximo passo eh imediato
-  end  
-  
-  for item in all(itens) do
-    if colide_aabb(player.x, player.y, 8, 8, item.x, item.y, 8, 8) then
-      player.life += item.efeito  -- aplica +1 ou -1
-      sfx(item.sfx_id)           -- toca o som do item
-      del(itens, item)           -- remove o item do mundo
-    end
-  end
-
-  -- garantir que life fique entre 0 e um maximo
-  player.life = mid(0, player.life, 9)  
-  
-end
-
-function _draw()
-  cls(0)
-  
-  -- map(cx, cy, sx, sy, cw, ch)
-  -- cx,cy = celula inicial do mapa
-  -- sx,sy = posicao na tela
-  -- cw,ch = quantidade de celulas a desenhar
-  --map(0, 0, 0, 0, 30, 17)
-  map()
-  
-  for item in all(itens) do
-    spr(item.spr_id, item.x, item.y)
-  end  
-  
-  -- desenhar o jogador POR CIMA do mapa
-  spr(player.spr_id, player.x, player.y, player.dir == -1)
-  
-  -- desenhar UI com a vida do jogador
-  local pos = 0
-  for i=1, player.life do 
-    pos+= 10  
-    spr(43, pos, 10)
-  end
-  
-end
-
--- retorna true se o pixel (x,y) esta dentro de um tile solido
-function solido(x, y)
-  local cx = flr(x / 8)
-  local cy = flr(y / 8)
-  return fget(mget(cx, cy), 0)
-end
-
--- testa os 4 cantos do retangulo do jogador
-function colide_mapa(x, y, w, h)
-  return solido(x,     y)
-      or solido(x+w-1, y)
-      or solido(x,     y+h-1)
-      or solido(x+w-1, y+h-1)
-end
-
-function colide_aabb(ax, ay, aw, ah, bx, by, bw, bh)
-  return ax < bx+bw
-     and ax+aw > bx
-     and ay < by+bh
-     and ay+ah > by
-end
 :: .info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 19:46:31",runtime=27,workspaces={{location="main.lua#42",workspace_index=1},{location="gfx/0.gfx#45",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 22:44:07",runtime=27,workspaces={{location="main.lua#103",workspace_index=1},{location="gfx/0.gfx#28",workspace_index=2},{location="map/0.map",workspace_index=3},{location="sfx/0.sfx",workspace_index=4}}]]
 :: gfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 19:46:31"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 22:44:07"]]
 :: gfx/0.gfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNi0w
-Ny0wNSAxNzowMDowMSIscmV2aXNpb249NzFdXWx6NADpAQAAMTIAAPMhe1swXT17Ym1wPXB4dQBD
+Ny0wNSAyMjozMjo1MCIscmV2aXNpb249NzJdXWx6NADaAQAAHjIAAPMhe1swXT17Ym1wPXB4dQBD
 IAgIBPACBxAHQBdQF0AHEAfwAixmbGFncz0wLHBhbl94CADLeT0wLHpvb209OH0sPgAfMDEAHPMI
 cFUwFQAVEAUwBVAVMAUQBVAVQAUABQBGAB8xdwAWD6gATf8IEDYgBjAGAAZQFlAWMAYAFlAWUAYA
 VgB3AB35AAEGADYQBkAGAAYABiAGAAgAD08AH6EABoA2EAYwBhBWBgAwNgAGCAAvMDZIABpfEBAE
 8PAxAEpDCAgEUN8BL0Al5wErD9kAfkKQJgcgfgEBggFfBwYQVoDWAB3PBQZQBgAGMAZAFvAF4QB_
 DnQBMy43NTQALy0xNQAE3BUABTAFAAVABXAF8BYPAQ5AAA_mAC-wDCAmMAYHBgcwBgUGBUAmUAUw
-BgUmAAcGACYAB18DHyAmAR4PMQDh8AkSFRA1IAWABeAFsDUAJXAFQAXgBWBFAGXHAZ9QBfABNcAF
-8CiGAB4PMQD--8kAFwj-CQgQCCAIPxgIAH4CXggAAj4IIAIeCEAYoEgAHNHwAjggDxgAGAAOEA4w
-BAA-ID6QRAAdIAoyRAAuEgBAAA8uARQPMQD-----------------------------------------
-------------MlBtPTh9fQ==
+BgUmAAcGACYAB18DHyAmAR4PMQDdAEQB-wMFMDUANUAFYAUAJQBFYAWANRBzAB4PMQD--8kABAj-
+CQgQCCAIPxgIAH4CXggAAj4IIAIeCEAYoEgAHNHwAjggDxgAGAAOEA4wBAA-ID6QRAAdIAoyRAAu
+EgBAAA8uARQPMQD-----------------------------------------------------MlBtPTh9
+fQ==
+:: main.lua
+b64$LS1bW3BvZF9mb3JtYXQ9InJhdyIsY3JlYXRlZD0iMjAyNS0xMi0yNiAyMzo1Mjo0MyIsbW9k
+aWZpZWQ9IjIwMjYtMDctMDUgMjI6NDQ6MDciLHJldmlzaW9uPTEyNl1dCmZ1bmN0aW9uIF9pbml0
+KCkKICBwbGF5ZXI9ewogICAgc3ByX2lkID0gMjEsCiAgICB4ID0gMTEwLAogICAgeSA9IDgwLAog
+ICAgdmVsID0gMSwgLS0gdmVsb2NpZGFkZSBkZSBtb3ZpbWVudG8KICAgIGRpciA9IDEsIC0tIDEg
+PSBkaXJlaXRhLCAtMSA9IGVzcXVlcmRhICAgIAogICAgbGlmZT0zLAogICAgbW92ZW5kbyA9IGZh
+bHNlLCAgIC0tIGVzdGEgc2UgbW92ZW5kbz8KICAgIHBhc3NvX3RpbWVyID0gMCAgICAtLSBjb250
+YWRvciBkZSBmcmFtZXMKICB9CiAgCiAgaXRlbnMgPSB7CiAgICB7IHg9MjEwLCB5PTgwLCAgc3By
+X2lkPTQ0LCAgZWZlaXRvPSAxLCBzZnhfaWQ9MCB9LCAgLS0gY3VyYTogKzEgdmlkYQogICAgeyB4
+PTI4MCwgeT0xMTIsIHNwcl9pZD00NSwgIGVmZWl0bz0tMSwgc2Z4X2lkPTEgfSwgIC0tIGRhbm86
+IC0xIHZpZGEKICAgIHsgeD0zMjAsIHk9NjQsICBzcHJfaWQ9NDQsICBlZmVpdG89IDEsIHNmeF9p
+ZD0wIH0sICAtLSBjdXJhOiArMQogIH0gIAogIAogIGNhbT17CiAgICB4ID0gcGxheWVyLngsCiAg
+ICB5ID0gcGxheWVyLnkKICB9ICAKZW5kCgpmdW5jdGlvbiBfdXBkYXRlKCkKICAtLSB0ZXN0YXIg
+WCBzZXBhcmFkYW1lbnRlCiAgbG9jYWwgdnggPSBwbGF5ZXIueAogIGxvY2FsIHZ5ID0gcGxheWVy
+LnkKICBwbGF5ZXIubW92ZW5kbyA9IGZhbHNlCiAgCiAgaWYgYnRuKDApIHRoZW4gdnggLT0gcGxh
+eWVyLnZlbDsgcGxheWVyLmRpciA9IC0xOyBwbGF5ZXIubW92ZW5kbyA9IHRydWUgZW5kCiAgaWYg
+YnRuKDEpIHRoZW4gdnggKz0gcGxheWVyLnZlbDsgcGxheWVyLmRpciA9IDE7IHBsYXllci5tb3Zl
+bmRvID0gdHJ1ZSBlbmQKICBpZiBidG4oMikgdGhlbiB2eSAtPSBwbGF5ZXIudmVsOyBwbGF5ZXIu
+bW92ZW5kbyA9IHRydWUgZW5kCiAgaWYgYnRuKDMpIHRoZW4gdnkgKz0gcGxheWVyLnZlbDsgcGxh
+eWVyLm1vdmVuZG8gPSB0cnVlIGVuZAoKICAtLSByZXNvbHZlciBYIGluZGVwZW5kZW50ZSBkZSBZ
+CiAgaWYgbm90IGNvbGlkZV9tYXBhKHZ4LCBwbGF5ZXIueSwgOCwgOCkgdGhlbgogICAgcGxheWVy
+LnggPSB2eAogIGVuZAoKICAtLSByZXNvbHZlciBZIGluZGVwZW5kZW50ZSBkZSBYCiAgaWYgbm90
+IGNvbGlkZV9tYXBhKHBsYXllci54LCB2eSwgOCwgOCkgdGhlbgogICAgcGxheWVyLnkgPSB2eQog
+IGVuZAoKICAtLSBkZWl4YXIgam9nYWRvciBkZW50cm8gZGEgdGVsYQogIHBsYXllci54ID0gbWlk
+KDEwLCBwbGF5ZXIueCwgNDcwKQogIHBsYXllci55ID0gbWlkKDEwLCBwbGF5ZXIueSwgMjYwKQog
+IAogIC0tIGNhbWVyYSBzdWF2ZTogYXByb3hpbWEgMjAlIHBvciBmcmFtZQogIGNhbS54ICs9IChw
+bGF5ZXIueCAtIGNhbS54KSAqIDAuMgogIGNhbS55ICs9IChwbGF5ZXIueSAtIGNhbS55KSAqIDAu
+MgoKICAtLSBsaW1pdGFyIGNhbWVyYSBhcyBib3JkYXMgZG8gbWFwYSAobWFwYSBkZSAzMHgxNyB0
+aWxlcyA9IDQ4MHgyNzIgcHgpCi0tICBjYW0ueCA9IG1pZCgwLCBjYW0ueCAtIDI0MCwgNDgwIC0g
+NDgwKQotLSAgY2FtLnkgPSBtaWQoMCwgY2FtLnkgLSAxMzUsIDI3MiAtIDI3MCkgIAogIAogIC0t
+IHNvbSBkZSBwYXNzb3MKICBpZiBwbGF5ZXIubW92ZW5kbyB0aGVuCiAgICBwbGF5ZXIucGFzc29f
+dGltZXIgLT0gMQogICAgaWYgcGxheWVyLnBhc3NvX3RpbWVyIDw9IDAgdGhlbgogICAgICBzZngo
+MikgICAgICAgICAgICAgICAgICAgLS0gc2Z4IDIgPSBzb20gZGUgcGFzc28KICAgICAgcGxheWVy
+LnBhc3NvX3RpbWVyID0gMTYgIC0tIGludGVydmFsbzogdG9jYSBhIGNhZGEgMTYgZnJhbWVzCiAg
+ICBlbmQKICBlbHNlCiAgICBwbGF5ZXIucGFzc29fdGltZXIgPSAwICAgICAtLSB6ZXJhIGFvIHBh
+cmFyLCBwcm94aW1vIHBhc3NvIGVoIGltZWRpYXRvCiAgZW5kICAKICAKICBmb3IgaXRlbSBpbiBh
+bGwoaXRlbnMpIGRvCiAgICBpZiBjb2xpZGVfYWFiYihwbGF5ZXIueCwgcGxheWVyLnksIDgsIDgs
+IGl0ZW0ueCwgaXRlbS55LCA4LCA4KSB0aGVuCiAgICAgIHBsYXllci5saWZlICs9IGl0ZW0uZWZl
+aXRvICAtLSBhcGxpY2EgKzEgb3UgLTEKICAgICAgc2Z4KGl0ZW0uc2Z4X2lkKSAgICAgICAgICAg
+LS0gdG9jYSBvIHNvbSBkbyBpdGVtCiAgICAgIGRlbChpdGVucywgaXRlbSkgICAgICAgICAgIC0t
+IHJlbW92ZSBvIGl0ZW0gZG8gbXVuZG8KICAgIGVuZAogIGVuZAoKICAtLSBnYXJhbnRpciBxdWUg
+bGlmZSBmaXF1ZSBlbnRyZSAwIGUgdW0gbWF4aW1vCiAgcGxheWVyLmxpZmUgPSBtaWQoMCwgcGxh
+eWVyLmxpZmUsIDkpICAKICAKZW5kCgpmdW5jdGlvbiBfZHJhdygpCiAgY2xzKDApCiAgCiAgLS0g
+YXBsaWNhciBjYW1lcmEgKGNlbnRyYWxpemFkYSBubyBqb2dhZG9yKQogIGNhbWVyYShjYW0ueCAt
+IDI0MCwgY2FtLnkgLSAxMzUpICAKICAKICAtLSBtYXAoY3gsIGN5LCBzeCwgc3ksIGN3LCBjaCkK
+ICAtLSBjeCxjeSA9IGNlbHVsYSBpbmljaWFsIGRvIG1hcGEKICAtLSBzeCxzeSA9IHBvc2ljYW8g
+bmEgdGVsYQogIC0tIGN3LGNoID0gcXVhbnRpZGFkZSBkZSBjZWx1bGFzIGEgZGVzZW5oYXIKICAt
+LW1hcCgwLCAwLCAwLCAwLCAzMCwgMTcpCiAgbWFwKCkKICAKICBmb3IgaXRlbSBpbiBhbGwoaXRl
+bnMpIGRvCiAgICBzcHIoaXRlbS5zcHJfaWQsIGl0ZW0ueCwgaXRlbS55KQogIGVuZCAgCiAgCiAg
+LS0gZGVzZW5oYXIgbyBqb2dhZG9yIFBPUiBDSU1BIGRvIG1hcGEKICBzcHIocGxheWVyLnNwcl9p
+ZCwgcGxheWVyLngsIHBsYXllci55LCBwbGF5ZXIuZGlyID09IC0xKQogIAogIC0tIHJlc2V0YXIg
+Y8OibWVyYSBBTlRFUyBkbyBIVUQKICBjYW1lcmEoKSAgCiAgCiAgLS0gZGVzZW5oYXIgVUkgY29t
+IGEgdmlkYSBkbyBqb2dhZG9yCiAgcmVjdCg4LDgsMTAwLDE4KQogIGxvY2FsIHBvcyA9IDAKICBm
+b3IgaT0xLCBwbGF5ZXIubGlmZSBkbyAKICAgIHBvcys9IDEwICAKICAgIHNwcig0MywgcG9zLCAx
+MCkKICBlbmQKICAKZW5kCgotLSByZXRvcm5hIHRydWUgc2UgbyBwaXhlbCAoeCx5KSBlc3RhIGRl
+bnRybyBkZSB1bSB0aWxlIHNvbGlkbwpmdW5jdGlvbiBzb2xpZG8oeCwgeSkKICBsb2NhbCBjeCA9
+IGZscih4IC8gOCkKICBsb2NhbCBjeSA9IGZscih5IC8gOCkKICByZXR1cm4gZmdldChtZ2V0KGN4
+LCBjeSksIDApCmVuZAoKLS0gdGVzdGEgb3MgNCBjYW50b3MgZG8gcmV0YW5ndWxvIGRvIGpvZ2Fk
+b3IKZnVuY3Rpb24gY29saWRlX21hcGEoeCwgeSwgdywgaCkKICByZXR1cm4gc29saWRvKHgsICAg
+ICB5KQogICAgICBvciBzb2xpZG8oeCt3LTEsIHkpCiAgICAgIG9yIHNvbGlkbyh4LCAgICAgeSto
+LTEpCiAgICAgIG9yIHNvbGlkbyh4K3ctMSwgeStoLTEpCmVuZAoKZnVuY3Rpb24gY29saWRlX2Fh
+YmIoYXgsIGF5LCBhdywgYWgsIGJ4LCBieSwgYncsIGJoKQogIHJldHVybiBheCA8IGJ4K2J3CiAg
+ICAgYW5kIGF4K2F3ID4gYngKICAgICBhbmQgYXkgPCBieStiaAogICAgIGFuZCBheSthaCA_IGJ5
+CmVuZA==
 :: map/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 19:46:31"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 22:44:07"]]
 :: map/0.map
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTAxLTE3IDEwOjM1OjQ4Iixtb2RpZmllZD0iMjAyNi0w
-Ny0wNSAxOTozMjoyNSIscmV2aXNpb249NDBdXWx6NABWAQAAYwIAAPEQe3tibXA9cHh1AEyAICAA
-iQAACQpgAAJgAAAAAArAHgYAgBEAAAACoAACFAD1AQATwAQKYAAHAAAKYAAToAAhAFEKwAAKAA8A
-oAAAGwAEAAAAG2AVAA8hAAGVAQAAAA4AAwAAIQARARgAGg4nAAFFAC8AACcADRUGIQAxAsABvQAP
-IQACERMhAAPbAIATYAAKoAAFAAYANgIAAkIAIaABEgAQFRIAQQAAG6A9AAQeAASBABELKgAkBgoU
-AT8KAAIkAAIBEgASBCkBAo0AjxNgAgqgABMAKgAAAvAAAQkAHwYeAAgxE2AGQgALZgACtwARAeQA
-RwYKYAMeAAGcACcACQwAEQsnABECLAEUCWwARwEKABokABcaJADxCv8AACYsaGlkZGVuPWZhbHNl
-LHBhbl94PTAIAOJ5PS0zMix0aWxlX2g9OAkAwHc9OCx6b29tPTF9fQ==
+Ny0wNSAyMjozMjoxNSIscmV2aXNpb249NDJdXWx6NACuAQAARAMAAPEHe3tibXA9cHh1AEyAICAA
+BgAAAAoAHgYAAAEAlQKgEwqgAAIABxIAuArACgAACApgAAJgFQARCQwAFRESADECwAkkAAEMACGg
+BEUAQQIAAAYVABANJwBRwAIAAAEPABELJAAAHwCAAAAAE8AECmBwAFIKYAAToF0AEAEGAAGEAEQC
+oAMKKgAkCsB_AKAAABsABAAAABtgFQAHMwAUADMAAQ8AJcADFQAHPAAAGwAhDgAbAA08AD8KwAU5
+AAcBcgAvAAA5AB8VBjMANQLAASYBAjMANwLAAxIACzMAAlQAEQwnAAMkAJQTYAAKoAAFAABiAQRa
+ACegASkBEBMGAEEAABugSQAEJAAKsQARCTYAFgY2AAEIAA4qAAGiABQFGwASBKcBAhsAiBNgAgqg
+ABMAMwAUC8kAFAQJAB8GHgAIMRNgBkIACR4AIgAAzAARAX4AEQZyABcCIQACDAAXCQwAEQsqABEC
+SgEIGAAbGgwABCQA8Qr-AAAmLGhpZGRlbj1mYWxzZSxwYW5feD0wCADieT0tMzIsdGlsZV9oPTgJ
+AMB3PTgsem9vbT0xfX0=
 :: sfx/.info.pod
---[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 19:46:31"]]
+--[[pod,created="2025-11-13 21:07:43",modified="2026-07-05 22:44:07"]]
 :: sfx/0.sfx
 b64$LS1bW3BvZCxjcmVhdGVkPSIyMDI1LTA3LTMxIDA4OjMwOjI4Iixtb2RpZmllZD0iMjAyNi0w
-Ny0wNSAxOToyMzowMSIscmV2aXNpb249MTddXWx6NADLAAAAPwoAAP8wcHh1AAMoAAAEAAQPQBAC
+Ny0wNSAyMjoyODowNSIscmV2aXNpb249MjFdXWx6NADMAAAAPQoAAP8wcHh1AAMoAAAEAAQPQBAC
 DgABoAEgAqAOAA8QAA3wygECA0APD5AEBQYHQAyQCAkKC0AMkA8MDw0PDgxADPD-AQDr-yeqARAG
 DzAQASABIAHwAAIQAg4QASAPISABMA9A8MMPKA--8MYP_AoP-w_AD-cPDQHwCQEQBg4wAP------
-vR--AQCs8wjID0AADxBADzsPS---LhD9Lh8g-S7wcBYA5EIPLw8d-S0h-S0vIP0tFwBzAw8WDP0t
-IBUAH-8BAP-nUP----_W
+vR--AQCs8wjID0AADxBADzsPS---LhD9Lh8g-S7wcBYA5UIPLw8d-S0h-S0vIP0tFwDPDv0vAP0v
+DyD9L-D-AQD-51D-----lg==
 :: [eoc]
