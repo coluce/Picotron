@@ -1,0 +1,1584 @@
+picotron cartridge // www.picotron.net
+version 2
+
+:: main.lua
+-- ninja pergaminhos — picotron edition
+-- setas: mover / x: pular / z ou o: shuriken
+-- pergaminho 1: dash (2x <- ou ->) + controle melhor
+-- pergaminho 2: pulo duplo
+-- 480x270, tiles 16x16, mundo 60x17 tiles (duas telas)
+-- arte, mapa e audio gerados por codigo: sem .gfx/.map/.sfx
+
+-- ============================================================
+-- constantes
+-- ============================================================
+SW,SH=480,270
+TW=16
+MW,MH=60,17
+WW,WH=MW*TW,MH*TW
+
+GRAV=0.24
+JUMP=-5.8
+PWF,PHF=10,18
+
+-- paleta estendida (32..47 definidos no boot)
+C={
+ sky0=32,sky1=33,sky2=34,sky3=35,sky4=36,
+ moon=37,far=38,near=39,mist=40,
+ grass=41,grass2=42,bamboo=43,bamboo2=44,
+ stone=45,stone2=46,skin2=47,
+}
+
+-- ============================================================
+-- mapa: . vazio  # terra  % rocha  = plataforma de madeira
+-- ============================================================
+level={
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ ".....................................................#######",
+ ".....................................................%%%%%%%",
+ "................................................==...%%%%%%%",
+ "...........................====......................%%%%%%%",
+ "....====..........====...............................%%%%%%%",
+ ".....................................................%%%%%%%",
+ ".....................................................%%%%%%%",
+ "############...#######################...############%%%%%%%",
+ "%%%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%",
+ "%%%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%",
+}
+
+-- ============================================================
+-- estado global
+-- ============================================================
+frame=0
+state="title"
+score=0
+lives=3
+cam=0
+check=24
+shake=0
+toast=""
+tt=0
+prompt=0
+muted=false
+prevbtn={}
+prevkey=false
+voices={}
+voiceseq=1
+music_on=false
+mtick=0
+mstep=0
+mtempo=10
+parts={}
+shuris={}
+enemies={}
+scrolls={}
+flies={}
+leaves={}
+p={}
+sky=nil
+far=nil
+near=nil
+levelbmp=nil
+hudbar=nil
+clouds={}
+
+-- ============================================================
+-- utilidades
+-- ============================================================
+function cp(i,r,g,b) poke(0x5000+i*4,b,g,r,0) end
+
+function set_palette()
+ cp(32,  8,  6, 20)
+ cp(33, 20, 14, 44)
+ cp(34, 42, 22, 68)
+ cp(35, 88, 38, 84)
+ cp(36,158, 66, 88)
+ cp(37,255,246,214)
+ cp(38, 46, 40, 94)
+ cp(39, 28, 24, 64)
+ cp(40,110, 76,130)
+ cp(41, 82,160,100)
+ cp(42, 48,110, 78)
+ cp(43,150,170,110)
+ cp(44, 86,106, 70)
+ cp(45,120,124,140)
+ cp(46, 72, 76, 96)
+ cp(47,196,110, 96)
+end
+
+function usetarget(ud)
+ set_draw_target(ud)
+ clip()
+ camera()
+ fillp()
+end
+
+function clear_target(ud,col)
+ usetarget(ud)
+ cls(col or 0)
+end
+
+function dither(x0,y0,x1,y1,c,par)
+ for y=y0,y1 do
+  for x=x0,x1 do
+   if ((x+y+(par or 0))%2)==0 then pset(x,y,c) end
+  end
+ end
+end
+
+function dither_band(y0,y1,c0,c1,seed)
+ for y=y0,y1 do
+  local t=(y-y0)/(y1-y0+1)
+  for x=0,SW-1 do
+   if rnd(1)<t then pset(x,y,c1) else pset(x,y,c0) end
+  end
+ end
+end
+
+function ptext(s,x,y,c)
+ print(s,x+1,y+1,0)
+ print(s,x,y,c)
+end
+
+function ctext(s,y,c)
+ local x=flr((SW-#s*5)/2)
+ ptext(s,x,y,c)
+end
+
+-- fonte 4x7 da RAM (0x4000), ampliada
+function bigtext(s,x,y,sc,c)
+ for i=1,#s do
+  local ch=ord(s,i)
+  local gx=x+(i-1)*6*sc
+  for row=0,6 do
+   local b=peek(0x4000+ch*8+row)
+   if b~=0 then
+    for col=0,4 do
+     if (b&(1<<col))~=0 then
+      rectfill(gx+col*sc,y+row*sc,gx+col*sc+sc-1,y+row*sc+sc-1,c)
+     end
+    end
+   end
+  end
+ end
+end
+
+function bigtext_shadow(s,x,y,sc,c)
+ bigtext(s,x+3,y+3,sc,0)
+ bigtext(s,x,y,sc,c)
+end
+
+-- fonte compacta (0x5600), a mesma do print
+function smalltext(s,x,y,sc,c)
+ for i=1,#s do
+  local ch=ord(s,i)
+  local gx=x+(i-1)*5*sc
+  for row=0,7 do
+   local b=peek(0x5600+ch*8+row)
+   if b~=0 then
+    for col=0,2 do
+     if (b&(1<<col))~=0 then
+      rectfill(gx+col*sc,y+row*sc,gx+col*sc+sc-1,y+row*sc+sc-1,c)
+     end
+    end
+   end
+  end
+ end
+end
+
+function smalltext_shadow(s,x,y,sc,c)
+ smalltext(s,x+2,y+2,sc,0)
+ smalltext(s,x,y,sc,c)
+end
+
+-- ============================================================
+-- audio: banco de instrumentos gerado na RAM do PFX6416
+-- (sem sfx/0.sfx: o cartucho e autossuficiente)
+-- layout: indice 0x30000, instrumentos 0x40000, wavetable 0x50000
+-- ============================================================
+WAVE_BASE=0x50000
+WAVE_ADDR=WAVE_BASE/256
+NOISE_ADDR=(WAVE_BASE+4*2048)/256
+
+function put16(addr,v)
+ if v<0 then v=v+65536 end
+ poke(addr,v%256)
+ poke(addr+1,flr(v/256)%256)
+end
+
+function gen_wave(entry,kind)
+ local base=WAVE_BASE+entry*2048
+ for i=0,1023 do
+  local t=i/1024
+  local s
+  if kind==0 then s=math.sin(t*2*math.pi)
+  elseif kind==1 then s=1-4*math.abs(t-0.5)
+  elseif kind==2 then s=2*t-1
+  else s=(t<0.5) and 1 or -1 end
+  put16(base+i*2,flr(s*28000))
+ end
+end
+
+function gen_noise()
+ local seed=22222
+ for i=0,1023 do
+  seed=(seed*16807)%2147483647
+  put16(WAVE_BASE+4*2048+i*2,(seed%60001)-30000)
+ end
+end
+
+function aud_pval(addr,flags,v0,v1)
+ poke(addr,flags)
+ poke(addr+1,v0)
+ poke(addr+2,v1)
+ poke(addr+3,0)
+end
+
+function aud_node(base,kind,kindp)
+ poke(base,0)
+ poke(base+1,kind+(kindp<<4))
+ poke(base+2,0)
+ poke(base+3,0)
+end
+
+-- n: instrumento / wave: 0 sine, 64 tri, 128 saw, 192 square
+-- wtaddr / wth: wavetable (endereco em blocos de 256 bytes, altura)
+function mk_inst(n,wave,wtaddr,wth,vol)
+ local b=0x40000+n*512
+ for i=0,511 do poke(b+i,0) end
+ aud_node(b,1,0)               -- mixer raiz
+ aud_pval(b+4,0,64,64)         -- volume cheio, sem envelope
+ aud_pval(b+8,1,0,0)
+ aud_pval(b+12,1,0,0)
+ aud_pval(b+16,1,0,0)
+ aud_node(b+32,2,0)            -- OSC, wavetable 0
+ aud_pval(b+36,2,vol or 32,vol or 32)
+ aud_pval(b+40,1,0,0)          -- pan centro
+ aud_pval(b+44,0x21,0,0)       -- tune
+ aud_pval(b+48,1,0,0)          -- bend
+ aud_pval(b+52,0,wave,0)       -- wave
+ aud_pval(b+56,0,0,0)          -- phase
+ aud_pval(b+60,0,0,0)
+ poke(b+480,wtaddr%256)
+ poke(b+481,flr(wtaddr/256)%256)
+ poke(b+482,10)                -- 1024 amostras por onda
+ poke(b+483,wth)
+end
+
+function init_audio()
+ gen_wave(0,0) gen_wave(1,1) gen_wave(2,2) gen_wave(3,3) gen_noise()
+ -- indice
+ for i=0,31 do poke(0x30000+i,0) end
+ poke2(0x30000,5)              -- 5 instrumentos
+ poke2(0x30002,0)
+ poke2(0x30004,0)
+ poke2(0x30006,0)
+ poke4(0x30008,0x10000)        -- instrumentos em 0x40000
+ poke4(0x3000c,0)
+ poke4(0x30010,0)
+ poke4(0x30014,0)
+ poke2(0x30018,5880)
+ poke2(0x3001a,64)
+ poke(0x3001c,6)
+ mk_inst(0,0,WAVE_ADDR,4,32)    -- sine
+ mk_inst(1,64,WAVE_ADDR,4,32)   -- triangle
+ mk_inst(2,128,WAVE_ADDR,4,32)  -- saw
+ mk_inst(3,192,WAVE_ADDR,4,32)  -- square
+ mk_inst(4,0,NOISE_ADDR,1,32)   -- noise
+end
+
+SND={
+ jump={{3,57,42,3},{2,62,36,3},{2,67,28,3},{2,72,20,3}},
+ djump={{2,64,42,1},{2,69,36,1},{2,74,30,1},{3,79,22,1}},
+ shuri={{1,84,26,3},{1,79,22,3},{1,74,18,3},{2,69,12,3}},
+ kill={{2,40,30,4},{2,33,24,4},{3,26,16,4}},
+ dash={{1,50,34,2},{1,57,28,2},{2,64,22,2},{2,71,16,2}},
+ scroll={{3,60,30,0},{3,64,30,0},{3,67,28,0},{3,72,26,0},{4,76,24,0},{4,79,20,0}},
+ hurt={{2,55,40,2},{2,48,32,2},{2,41,24,2},{3,34,14,2}},
+ check={{4,72,30,0},{6,79,22,0},{4,84,18,0}},
+ win={{6,60,32,1},{6,64,32,1},{6,67,30,1},{6,72,28,1},{8,76,26,3},{8,79,24,3},{12,84,20,3}},
+ over={{6,48,30,2},{6,43,26,2},{6,36,22,2},{6,31,18,2},{12,24,12,2}},
+ start={{3,67,30,1},{3,72,26,1},{6,79,20,3}},
+}
+
+MEL={69,0,72,0,76,0,72,0, 69,0,67,0,64,0,67,0,
+     72,0,76,0,79,0,76,0, 74,0,71,0,67,0,71,0}
+BASS={45,41,48,43}
+
+function playsfx(name)
+ local src=SND[name]
+ if not src or muted then return end
+ -- copia + passo final de volume zero (evita clique no corte)
+ local d={}
+ for i=1,#src do d[i]=src[i] end
+ local last=src[#src]
+ d[#d+1]={1,last[2],0,last[4] or 0}
+ local ch=voiceseq
+ voiceseq=voiceseq%4+1
+ voices[ch]={d=d,i=1,t=d[1][1]}
+ note(d[1][2],d[1][4] or 0,d[1][3],0,0,ch,true)
+end
+
+function update_sfx()
+ for ch,v in pairs(voices) do
+  v.t-=1
+  if v.t<=0 then
+   v.i+=1
+   local st=v.d[v.i]
+   if st then
+    v.t=st[1]
+    note(st[2],st[4] or 0,st[3],0,0,ch,true)
+   else
+    voices[ch]=nil
+    sfx(-2,ch)
+   end
+  end
+ end
+end
+
+function stop_music()
+ music_on=false
+ sfx(-2,6)
+ sfx(-2,7)
+end
+
+function update_music()
+ if not music_on or muted then return end
+ mtick+=1
+ if mtick<mtempo then return end
+ mtick=0
+ mstep=mstep%32+1
+ local m=MEL[mstep]
+ if m and m>0 then note(m,1,13,0,0,6,true) end
+ if (mstep-1)%8==0 then
+  local b=BASS[flr((mstep-1)/8)+1]
+  note(b,0,17,0,0,7,true)
+ end
+end
+
+-- ============================================================
+-- entrada (sem auto-repeat: um toque = uma acao)
+-- ============================================================
+function down(b) return btn(b) and true or false end
+function pressed(b) return down(b) and not prevbtn[b] end
+
+function input_end()
+ for b=0,7 do prevbtn[b]=down(b) end
+ local km=key("m") and true or false
+ if km and not prevkey then
+  muted=not muted
+  poke(0x5538,muted and 0 or 0x40)
+  poke(0x5539,muted and 0 or 0x40)
+ end
+ prevkey=km
+end
+
+-- ============================================================
+-- mapa e colisao
+-- ============================================================
+function tileat(tx,ty)
+ if ty<0 or ty>=MH or tx<0 or tx>=MW then return "." end
+ return sub(level[ty+1],tx+1,tx+1)
+end
+
+function solid_at(tx,ty)
+ if tx<0 or tx>=MW then return true end
+ if ty<0 then return true end
+ if ty>=MH then return false end
+ local c=tileat(tx,ty)
+ return c=="#" or c=="%" or c=="="
+end
+
+function hit(x,y,w,h)
+ for ty=flr(y/TW),flr((y+h-0.01)/TW) do
+  for tx=flr(x/TW),flr((x+w-0.01)/TW) do
+   if solid_at(tx,ty) then return true end
+  end
+ end
+ return false
+end
+
+-- ============================================================
+-- arte pre-renderizada
+-- ============================================================
+function build_sky()
+ local ud=userdata("u8",SW,SH)
+ usetarget(ud)
+ -- bandas de gradiente (transicoes curtas com dither)
+ local bands={
+  {0,44,C.sky0},
+  {44,92,C.sky1},
+  {92,138,C.sky2},
+  {138,182,C.sky3},
+  {182,SH,C.sky4},
+ }
+ for b in all(bands) do rectfill(0,b[1],SW-1,b[2]-1,b[3]) end
+ for i=1,#bands-1 do
+  local y=bands[i][2]
+  dither_band(y-4,y-1,bands[i][3],bands[i+1][3])
+ end
+ -- estrelas
+ srand(31)
+ for i=1,130 do
+  local x=flr(rnd(SW))
+  local y=flr(rnd(172))
+  local dx=x-388
+  local dy=y-62
+  if dx*dx+dy*dy>50*50 then
+   local r=rnd(1)
+   local c=6
+   if r<0.4 then c=33 elseif r<0.68 then c=6 elseif r<0.9 then c=15 else c=7 end
+   pset(x,y,c)
+   if c==7 and rnd(1)<0.35 then
+    pset(x+1,y,6) pset(x,y+1,6)
+   end
+   if rnd(1)<0.18 then pset(x+1,y+1,c) end
+  end
+ end
+ -- lua com halo granulado
+ local mx,my,mr=388,62,24
+ srand(88)
+ for i=1,1100 do
+  local a=rnd(1)
+  local rr=mr+2+rnd(1)*30
+  local x=flr(mx+cos(a)*rr)
+  local y=flr(my+sin(a)*rr)
+  if rnd(1)<(1-(rr-mr)/32)*0.7 then
+   pset(x,y,(i%4==0) and C.sky3 or C.sky4)
+  end
+ end
+ circfill(mx,my,mr,C.moon)
+ -- sombra suave na borda inferior
+ for i=0,40 do
+  local a=i/40
+  local x=flr(mx+cos(a)*mr)
+  local y=flr(my+sin(a)*mr)
+  pset(x,y,C.sky4)
+ end
+ -- crateras
+ dither(mx-15,my+5,mx-6,my+13,6,0)
+ dither(mx+3,my-12,mx+11,my-5,6,1)
+ dither(mx+7,my+8,mx+14,my+14,C.sky4,0)
+ dither(mx-4,my-17,mx+3,my-11,C.sky3,1)
+ -- finas nuvens altas
+ srand(12)
+ for i=1,3 do
+  local y=118+i*12+flr(rnd(6))
+  local x=flr(rnd(SW))
+  local w=50+flr(rnd(90))
+  dither(x,y,x+w,y+2,C.sky3,0)
+  pset(x+4,y+3,C.sky2)
+ end
+ usetarget(nil)
+ return ud
+end
+
+function pagoda(x,base,h,col,rim)
+ local tiers=4
+ for i=0,tiers-1 do
+  local yy=base-flr(i*h/tiers)
+  local w=14-i*3
+  -- beiral
+  line(x-w,yy,x+w,yy,rim)
+  line(x-w+2,yy+1,x+w-2,yy+1,col)
+  line(x-w+3,yy+2,x+w-3,yy+2,col)
+  pset(x-w-1,yy-1,rim) pset(x+w+1,yy-1,rim)
+  -- corpo
+  rectfill(x-3,yy-7,x+3,yy-1,col)
+  line(x-3,yy-7,x+3,yy-7,rim)
+  pset(x-3,yy-4,rim) pset(x+3,yy-4,rim)
+ end
+ -- pinaculo
+ line(x,base-h,x,base-h-7,rim)
+ pset(x,base-h-8,rim)
+ pset(x-1,base-h-6,rim) pset(x+1,base-h-6,rim)
+end
+
+function build_far()
+ local w,h=720,170
+ local ud=userdata("u8",w,h)
+ usetarget(ud)
+ cls(0)
+ srand(101)
+ local function ry(x) return flr(96+sin(x/230)*20+sin(x/83+0.4)*9+sin(x/31+1.1)*4) end
+ for x=0,w-1 do
+  local y=ry(x)
+  line(x,y,x,h-1,C.far)
+  pset(x,y,C.sky3)
+  if (x+y)%3==0 then pset(x,y+1,C.sky3) end
+ end
+ pagoda(160,ry(160),46,C.far,C.sky3)
+ pagoda(552,ry(552),38,C.far,C.sky3)
+ for i=1,40 do
+  local x=flr(rnd(w))
+  local y=ry(x)
+  if rnd(1)<0.5 then pset(x,y+4+flr(rnd(20)),C.sky3) end
+ end
+ usetarget(nil)
+ return ud
+end
+
+function build_near()
+ local w,h=720,130
+ local ud=userdata("u8",w,h)
+ usetarget(ud)
+ cls(0)
+ srand(202)
+ for x=0,w-1 do
+  local y=flr(66+sin(x/150+0.8)*18+sin(x/57+2.2)*8+sin(x/23+0.2)*3)
+  line(x,y,x,h-1,C.near)
+  pset(x,y,C.far)
+ end
+ -- bambuzais silhueta
+ for i=1,26 do
+  local x=flr(rnd(w))
+  local y=flr(66+sin(x/150+0.8)*18+sin(x/57+2.2)*8+sin(x/23+0.2)*3)
+  local n=3+flr(rnd(3))
+  for j=1,n do
+   local bx=x+flr(rnd(10))-5
+   local hh=12+flr(rnd(26))
+   line(bx,y-hh,bx,y+2,C.near)
+   pset(bx,y-hh,C.bamboo2)
+   for k=1,3 do
+    local ny=y-flr(k*hh/4)
+    line(bx-2,ny,bx+2,ny,C.bamboo2)
+   end
+   line(bx,y-hh,bx+4,y-hh-2,C.bamboo2)
+   line(bx,y-hh+2,bx-4,y-hh-2,C.bamboo2)
+  end
+ end
+ usetarget(nil)
+ return ud
+end
+
+function build_cloud()
+ local ud=userdata("u8",72,22)
+ usetarget(ud)
+ cls(0)
+ srand(5)
+ for i=0,5 do
+  local x=6+i*10+flr(rnd(6))
+  local y=12+flr(rnd(4))-i%2*3
+  local r=4+flr(rnd(5))
+  circfill(x,y,r,C.sky2)
+  circfill(x-2,y-2,r-2,C.sky3)
+ end
+ dither(2,15,69,20,C.mist,0)
+ usetarget(nil)
+ return ud
+end
+
+-- ---------- tiles ----------
+function draw_earth(x,y,tx,ty)
+ srand(tx*97+ty*13+3)
+ local top=not solid_at(tx,ty-1)
+ rectfill(x,y,x+15,y+15,4)
+ if top then
+  local gc=(rnd(1)<0.35) and C.grass2 or C.grass
+  rectfill(x,y,x+15,y+2,gc)
+  rectfill(x,y+3,x+15,y+3,C.grass2)
+  for i=0,15 do
+   if ((i*7+tx*5)%6)<2 then pset(x+i,y+4,C.grass2) end
+  end
+  for i=0,5 do
+   local bx=x+flr(rnd(16))
+   line(bx,y-1-flr(rnd(2)),bx,y,C.grass)
+   if rnd(1)<0.4 then pset(bx+1,y-1,C.grass2) end
+  end
+ else
+  rectfill(x,y,x+15,y+15,4)
+ end
+ for i=1,7 do
+  local px=x+flr(rnd(16))
+  local py=y+(top and 6 or 1)+flr(rnd(10))
+  pset(px,py,20)
+  if rnd(1)<0.3 then pset(px+1,py,20) end
+ end
+ if rnd(1)<0.45 then
+  local px=x+2+flr(rnd(11))
+  local py=y+7+flr(rnd(7))
+  rectfill(px,py,px+1,py+1,C.stone2)
+ end
+ if not solid_at(tx-1,ty) then rectfill(x,y,x+1,y+15,21) end
+ if not solid_at(tx+1,ty) then rectfill(x+14,y,x+15,y+15,21) end
+end
+
+function draw_rock(x,y,tx,ty)
+ srand(tx*61+ty*29+7)
+ rectfill(x,y,x+15,y+15,21)
+ for i=0,3 do
+  local px=x+flr(rnd(13))
+  local py=y+flr(rnd(13))
+  local w=2+flr(rnd(3))
+  rectfill(px,py,px+w,py+1,C.stone2)
+  pset(px,py,C.stone)
+ end
+ if rnd(1)<0.5 then
+  local px=x+flr(rnd(12))
+  line(px,y+2,px+2,y+8,20)
+  pset(px+1,y+9,20)
+ end
+ if not solid_at(tx,ty-1) then
+  line(x,y,x+15,y,C.stone)
+  pset(x,y,C.grass2)
+ end
+ if not solid_at(tx-1,ty) then rectfill(x,y,x+1,y+15,20) end
+ if not solid_at(tx+1,ty) then rectfill(x+14,y,x+15,y+15,20) end
+end
+
+function draw_plank(x,y,tx,ty)
+ local left=tileat(tx-1,ty)~="="
+ local right=tileat(tx+1,ty)~="="
+ rectfill(x,y+3,x+15,y+11,4)
+ rectfill(x,y+3,x+15,y+4,9)
+ line(x,y,x+15,y,10)
+ line(x,y+1,x+15,y+1,9)
+ rectfill(x,y+9,x+15,y+11,20)
+ line(x,y+12,x+15,y+12,21)
+ -- veios
+ line(x+5,y+5,x+5,y+8,20)
+ line(x+11,y+5,x+11,y+8,20)
+ pset(x+2,y+6,25)
+ pset(x+9,y+7,25)
+ if left then rectfill(x,y,x+1,y+11,21) end
+ if right then rectfill(x+14,y,x+15,y+11,21) end
+ pset(x+2,y+3,6) pset(x+13,y+3,6)
+end
+
+function draw_bamboo(bx,base,seed)
+ srand(seed)
+ local n=3+flr(rnd(3))
+ for i=1,n do
+  local x=bx+i*5+flr(rnd(6))-6
+  local h=34+flr(rnd(46))
+  rectfill(x,base-h,x+1,base-1,C.bamboo2)
+  pset(x,base-h,C.bamboo)
+  for k=1,flr(h/8) do
+   local ny=base-k*8
+   line(x-2,ny,x+3,ny,C.bamboo2)
+   pset(x+1,ny,C.bamboo)
+  end
+  if rnd(1)<0.8 then
+   line(x+1,base-h+4,x+8,base-h+1,C.bamboo)
+   line(x+1,base-h+7,x-6,base-h+4,C.bamboo)
+  end
+ end
+end
+
+function build_hudbar()
+ local ud=userdata("u8",SW,16)
+ usetarget(ud)
+ cls(0)
+ rectfill(0,0,SW-1,11,0)
+ dither(0,12,SW-1,13,0,0)
+ dither(0,14,SW-1,15,0,1)
+ usetarget(nil)
+ return ud
+end
+
+function build_level()
+ local ud=userdata("u8",WW,WH)
+ usetarget(ud)
+ cls(0)
+ for ty=0,MH-1 do
+  for tx=0,MW-1 do
+   local c=tileat(tx,ty)
+   local x,y=tx*TW,ty*TW
+   if c=="#" then draw_earth(x,y,tx,ty)
+   elseif c=="%" then draw_rock(x,y,tx,ty)
+   elseif c=="=" then draw_plank(x,y,tx,ty) end
+  end
+ end
+ -- bambuzais de fundo
+ srand(9)
+ for i=1,14 do
+  local tx=flr(rnd(MW))
+  if tileat(tx,14)=="#" and not solid_at(tx,13) and not solid_at(tx,12) then
+   draw_bamboo(tx*TW+flr(rnd(8)),224,i*17)
+  end
+ end
+ -- tufos e pedrinhas no chao
+ srand(55)
+ for tx=0,MW-1 do
+  if tileat(tx,14)=="#" then
+   for k=1,2 do
+    if rnd(1)<0.5 then
+     local x=tx*TW+flr(rnd(14))
+     line(x,223,x,221,C.grass2)
+     pset(x+1,221,C.grass)
+    end
+   end
+  end
+ end
+ usetarget(nil)
+ return ud
+end
+
+-- ============================================================
+-- personagens
+-- ============================================================
+function draw_ninja(x,y,d,run,air,dash)
+ local function nx(a) if d>0 then return x+a else return x+9-a end end
+ local function rr(a,ay,b,by,c)
+  local x0,x1=nx(a),nx(b)
+  if x0>x1 then x0,x1=x1,x0 end
+  rectfill(x0,y+ay,x1,y+by,c)
+ end
+ -- sombra
+ if not air then ovalfill(x-1,y+17,x+10,y+18,21) end
+ -- cachecol
+ local bx=d>0 and x-1 or x+10
+ for i=0,6 do
+  local sx=bx-d*i*2
+  local sy=y+2+flr(sin(frame*0.05+i*0.17)*2)+i
+  local c=(i<2) and 8 or ((i<4) and 25 or 24)
+  local x0,x1=sx,sx+1
+  if x0>x1 then x0,x1=x1,x0 end
+  rectfill(x0,sy,x1,sy+1,c)
+ end
+ -- pernas
+ if air then
+  rr(2,14,4,17,1)
+  rr(5,15,7,17,1)
+  rr(1,17,4,17,5)
+  rr(5,17,8,17,5)
+ elseif run>0 then
+  if run==1 then
+   rr(1,14,3,17,1)
+   rr(6,14,8,16,1)
+   rr(0,17,3,17,5)
+   rr(6,17,9,17,5)
+  else
+   rr(2,14,4,16,1)
+   rr(5,14,7,17,1)
+   rr(2,17,5,17,5)
+   rr(6,17,9,17,5)
+  end
+ else
+  rr(2,14,4,17,1)
+  rr(5,14,7,17,1)
+  rr(1,17,5,17,5)
+  rr(5,17,9,17,5)
+ end
+ -- corpo
+ rr(1,7,8,13,1)
+ rr(1,7,1,10,13)
+ rr(8,7,8,11,12)
+ -- faixa no peito
+ line(nx(2),y+8,nx(7),y+10,8)
+ line(nx(2),y+9,nx(7),y+11,24)
+ -- faixa da cintura
+ rr(1,12,8,12,8)
+ rr(4,12,5,12,10)
+ rr(0,13,1,15,25)
+ -- bolsa de shuriken
+ pset(nx(7),y+12,6)
+ -- braco
+ rr(7,8,9,10,1)
+ rr(8,11,9,11,15)
+ -- cabeca
+ rr(0,0,6,6,1)
+ rr(1,0,8,1,1)
+ rr(2,0,6,0,13)
+ rr(0,2,1,3,8)
+ rr(-2,3,-1,5,8)
+ -- faixa da testa
+ rr(3,1,9,2,8)
+ rr(3,2,9,2,24)
+ -- rosto
+ rr(4,3,9,4,15)
+ rr(4,5,9,6,21)
+ -- olho
+ rectfill(nx(6),y+3,nx(6)+1,y+4,7)
+ pset(nx(7),y+3,0)
+ -- ponta do capuz
+ pset(nx(1),y+1,13)
+ if dash then
+  rr(3,8,9,8,12)
+  pset(nx(9),y+9,25)
+ end
+end
+function draw_enemy(e)
+ local x=flr(e.x)
+ local y=flr(e.y)+flr(sin(frame*0.07+e.x*0.09)*1.5)
+ -- cauda espectral
+ for i=0,2 do
+  local w=6-i*2
+  local yy=y+12+i*2
+  rectfill(x+8-w,yy,x+7+w,yy+1,21)
+  if i==0 then pset(x+5,yy,2) pset(x+10,yy,2) end
+ end
+ -- corpo
+ ovalfill(x+1,y+1,x+14,y+12,2)
+ ovalfill(x+2,y+2,x+13,y+7,18)
+ ovalfill(x+3,y+3,x+12,y+6,2)
+ -- chifres
+ line(x+2,y+2,x,y-2,6)
+ line(x+3,y+1,x+1,y-2,6)
+ line(x+13,y+2,x+15,y-2,6)
+ line(x+12,y+1,x+14,y-2,6)
+ -- olhos
+ local blink=((frame+flr(e.x))%113)>105
+ circfill(x+5,y+6,2,25)
+ circfill(x+10,y+6,2,25)
+ if not blink then
+  pset(x+5,y+6,10) pset(x+10,y+6,10)
+  pset(x+5,y+6,7) pset(x+10,y+6,7)
+ end
+ -- boca
+ rectfill(x+6,y+10,x+9,y+10,24)
+ pset(x+5,y+10,21) pset(x+10,y+10,21)
+ pset(x+1,y+8,21) pset(x+14,y+8,21)
+end
+
+function draw_scroll(s)
+ local bob=sin(frame*0.045+s.id)*2
+ local x=flr(s.x)
+ local y=flr(s.y+bob)
+ -- aura
+ if (frame\4+s.id)%2==0 then
+  circ(x,y,14,35)
+  circ(x,y,11,10)
+ end
+ for i=0,3 do
+  local a=frame*0.03+s.id*0.6+i*0.25
+  pset(flr(x+cos(a)*10),flr(y+sin(a)*10),(i%2==0) and 7 or 10)
+ end
+ -- corpo de papel
+ rectfill(x-5,y-4,x+4,y+4,7)
+ rectfill(x-5,y+3,x+4,y+4,6)
+ -- suporte e bordas enroladas
+ rectfill(x-7,y-6,x+6,y-5,4)
+ rectfill(x-7,y+4,x+6,y+5,4)
+ rectfill(x-7,y-5,x-6,y+4,9)
+ rectfill(x+5,y-5,x+6,y+4,9)
+ rectfill(x-7,y-5,x-7,y+4,25)
+ rectfill(x+6,y-5,x+6,y+4,25)
+ -- tinta
+ line(x-4,y-1,x+2,y-1,21)
+ line(x-4,y+1,x+2,y+1,21)
+ pset(x+2,y+1,8)
+ rectfill(x-4,y+2,x-3,y+3,8)
+ -- brilho
+ pset(x-6,y-6,7)
+ pset(x+5,y+5,7)
+end
+function draw_shuri(s)
+ local x=flr(s.x)+3
+ local y=flr(s.y)+3
+ local a=s.t*0.3
+ for i=0,3 do
+  local aa=a+i*0.25
+  line(x,y,x+cos(aa)*4,y+sin(aa)*4,7)
+  pset(x+cos(aa)*4,y+sin(aa)*4,6)
+ end
+ pset(x,y,7)
+ pset(x-sgn(s.vx)*5,y,6)
+end
+
+function draw_parts()
+ for q in all(parts) do
+  local x=flr(q.x)
+  local y=flr(q.y)
+  if q.big then
+   rectfill(x,y,x+1,y+1,q.c)
+  else
+   pset(x,y,q.c)
+  end
+  if q.glow then pset(x+1,y,q.c) end
+ end
+end
+
+function draw_torii(cx,base)
+ -- halo
+ if (frame\16)%2==0 then
+  circ(cx,base-34,34,35)
+  circ(cx,base-34,40,34)
+ end
+ -- pilares
+ rectfill(cx-29,base-62,cx-21,base-1,8)
+ rectfill(cx-29,base-62,cx-29,base-1,24)
+ rectfill(cx-25,base-62,cx-24,base-1,25)
+ rectfill(cx+20,base-62,cx+28,base-1,8)
+ rectfill(cx+28,base-62,cx+28,base-1,24)
+ rectfill(cx+22,base-62,cx+23,base-1,25)
+ -- bases de pedra
+ rectfill(cx-32,base-3,cx-18,base-1,5)
+ rectfill(cx+17,base-3,cx+31,base-1,5)
+ line(cx-32,base-3,cx-18,base-3,6)
+ line(cx+17,base-3,cx+31,base-3,6)
+ -- viga superior
+ rectfill(cx-40,base-66,cx+40,base-60,8)
+ rectfill(cx-40,base-66,cx+40,base-65,25)
+ rectfill(cx-40,base-61,cx+40,base-60,24)
+ line(cx-42,base-66,cx+42,base-66,21)
+ line(cx-42,base-66,cx-44,base-68,21)
+ line(cx+42,base-66,cx+44,base-68,21)
+ -- segunda viga
+ rectfill(cx-31,base-52,cx+31,base-49,8)
+ rectfill(cx-31,base-52,cx+31,base-52,24)
+ rectfill(cx-31,base-49,cx+31,base-49,25)
+ -- placa
+ rectfill(cx-9,base-62,cx+9,base-53,21)
+ line(cx-9,base-62,cx+9,base-62,10)
+ line(cx-9,base-53,cx+9,base-53,10)
+ line(cx-9,base-62,cx-9,base-53,10)
+ line(cx+9,base-62,cx+9,base-53,10)
+ line(cx-3,base-60,cx-3,base-55,10)
+ line(cx-3,base-60,cx+3,base-55,10)
+ line(cx+3,base-60,cx+3,base-55,10)
+ -- corda sagrada
+ for i=-26,26,4 do
+  line(cx+i,base-47,cx+i+2,base-45,7)
+  line(cx+i+2,base-45,cx+i+4,base-47,7)
+ end
+ line(cx-5,base-47,cx-5,base-42,7)
+ line(cx+5,base-47,cx+5,base-42,7)
+ pset(cx-5,base-41,7) pset(cx+5,base-41,7)
+ -- reflexo
+ dither(cx-34,base-8,cx+34,base-2,25,0)
+end
+
+function draw_lantern(cx,base,lit)
+ rectfill(cx-7,base-3,cx+7,base-1,45)
+ line(cx-7,base-3,cx+7,base-3,5)
+ rectfill(cx-3,base-11,cx+3,base-4,46)
+ rectfill(cx-3,base-11,cx-3,base-4,45)
+ rectfill(cx-6,base-19,cx+6,base-12,45)
+ rectfill(cx-5,base-18,cx+5,base-13,lit and 10 or 21)
+ rectfill(cx-8,base-22,cx+8,base-20,5)
+ line(cx-9,base-22,cx+9,base-22,6)
+ pset(cx,base-23,6)
+ rectfill(cx-9,base-19,cx+9,base-19,46)
+ if lit then
+  pset(cx,base-16,25)
+  pset(cx,base-15,10)
+  pset(cx-1,base-14,9)
+  pset(cx+1,base-14,9)
+  circ(cx,base-16,7,9)
+  circ(cx,base-16,12,25)
+  dither(cx-9,base-24,cx+9,base-8,9,1)
+  pset(cx-3,base-16,9) pset(cx+3,base-16,9)
+ else
+  pset(cx-2,base-16,5)
+ end
+end
+
+-- ============================================================
+-- estado do jogo
+-- ============================================================
+function newgame()
+ score=0
+ lives=3
+ cam=0
+ check=24
+ shake=0
+ prompt=0
+ tt=0
+ p={x=24,y=206,vx=0,vy=0,face=1,ground=false,inv=0,coyote=0,jumps=0,jbuf=0,
+    s1=false,s2=false,dash=0,dashcd=0,shoot=0,anim=0,ltap=-99,rtap=-99}
+ scrolls={
+  {x=100,y=160,id=1,got=false},
+  {x=800,y=208,id=2,got=false},
+ }
+ enemies={
+  {x=64,y=210,x1=48,x2=176,dir=1,spd=0.55,anim=0,dead=false},
+  {x=296,y=162,x1=290,x2=336,dir=-1,spd=0.45,anim=0,dead=false},
+  {x=448,y=146,x1=436,x2=474,dir=1,spd=0.4,anim=0,dead=false},
+  {x=540,y=210,x1=536,x2=600,dir=1,spd=0.6,anim=0,dead=false},
+  {x=672,y=210,x1=664,x2=768,dir=-1,spd=0.5,anim=0,dead=false},
+ }
+ shuris={}
+ parts={}
+ flies={}
+ leaves={}
+ srand(4242)
+ for i=1,16 do
+  add(flies,{x=rnd(WW),y=200+rnd(60),p=rnd(1),s=0.2+rnd(.3)})
+ end
+ for i=1,10 do
+  add(leaves,{x=rnd(WW),y=rnd(WH),s=0.3+rnd(.5),p=rnd(1)})
+ end
+ state="play"
+ music_on=true
+ poke(0x5538,muted and 0 or 0x40)
+ poke(0x5539,muted and 0 or 0x40)
+ mtick=0
+ mstep=0
+ say("X PULA   Z SHURIKEN",190)
+end
+
+function say(s,t)
+ toast=s
+ tt=t or 150
+end
+
+function startdash(d)
+ p.face=d
+ p.dash=8
+ p.dashcd=30
+ p.vy=0
+ playsfx("dash")
+ burst(p.x+5,p.y+9,8,12)
+end
+
+function burst(x,y,n,c)
+ for i=1,n do
+  add(parts,{x=x,y=y,vx=(rnd(2)-1)*1.8,vy=-rnd(2.2),
+   life=10+rnd(16),c=c,big=(rnd(1)<.4)})
+ end
+end
+
+function update_player()
+ p.inv=max(0,p.inv-1)
+ p.dashcd=max(0,p.dashcd-1)
+ p.shoot=max(0,p.shoot-1)
+ p.anim+=1
+ local dir=(down(1) and 1 or 0)-(down(0) and 1 or 0)
+ local jp=pressed(5)
+ local fp=pressed(4)
+ if jp then p.jbuf=6 end
+
+ -- dash: duplo toque na direcao, depois do pergaminho 1
+ if p.s1 then
+  if pressed(0) then
+   if frame-p.ltap<18 and p.dashcd<=0 then startdash(-1) end
+   p.ltap=frame
+  elseif pressed(1) then
+   if frame-p.rtap<18 and p.dashcd<=0 then startdash(1) end
+   p.rtap=frame
+  end
+ end
+
+ if p.dash>0 then
+  p.dash-=1
+  p.vx=p.face*6.4
+  p.vy=0
+  if frame%3==0 then
+   add(parts,{x=p.x+5,y=p.y+9,vx=-p.face*1.2,vy=(rnd(2)-1)*.6,
+    life=12,c=12,big=true})
+  end
+ else
+  local acc=p.s1 and .30 or .16
+  local fr=p.s1 and .78 or .90
+  if dir~=0 then
+   p.vx+=dir*acc
+   p.face=dir
+  else
+   p.vx*=fr
+   if abs(p.vx)<.02 then p.vx=0 end
+  end
+  local mx=p.s1 and 2.8 or 2.0
+  p.vx=mid(-mx,p.vx,mx)
+ end
+
+ if p.ground then p.coyote=4 p.jumps=0 end
+ if p.jbuf>0 then
+  if p.ground or p.coyote>0 then
+   p.vy=JUMP
+   p.ground=false
+   p.dash=0
+   p.coyote=0
+   p.jumps=1
+   p.jbuf=0
+   playsfx("jump")
+  elseif p.s2 and p.jumps<2 then
+   p.vy=JUMP*.92
+   p.jumps=2
+   p.dash=0
+   p.jbuf=0
+   playsfx("djump")
+   burst(p.x+5,p.y+PHF,10,12)
+  end
+ end
+ if p.jbuf>0 then p.jbuf-=1 end
+ if p.coyote>0 then p.coyote-=1 end
+ if p.dash<=0 then p.vy=min(p.vy+GRAV,8) end
+
+ -- eixo X
+ if abs(p.vx)>0 then
+  p.x+=p.vx
+  if hit(p.x,p.y,PWF,PHF) then
+   if p.vx>0 then
+    p.x=flr((p.x+PWF)/TW)*TW-PWF
+   else
+    p.x=(flr(p.x/TW)+1)*TW
+   end
+   local s=sgn(p.vx)
+   while hit(p.x,p.y,PWF,PHF) do p.x-=s*.25 end
+   p.vx=0
+   if p.dash>0 then p.dash=0 end
+  end
+ end
+ -- eixo Y
+ p.ground=false
+ if abs(p.vy)>0 then
+  p.y+=p.vy
+  if hit(p.x,p.y,PWF,PHF) then
+   if p.vy>0 then
+    p.y=flr((p.y+PHF)/TW)*TW-PHF
+    p.ground=true
+   else
+    p.y=(flr(p.y/TW)+1)*TW
+   end
+   local s=sgn(p.vy)
+   while hit(p.x,p.y,PWF,PHF) do p.y-=s*.25 end
+   p.vy=0
+  end
+ end
+ if p.dash>0 and hit(p.x,p.y+1,PWF,PHF) then p.ground=true end
+
+ -- checkpoint
+ if p.ground and p.x>440 and check<440 then
+  check=470
+  playsfx("check")
+  if tt<=0 then say("CHECKPOINT",90) end
+ end
+
+ if fp and p.shoot<=0 then
+  add(shuris,{x=p.x+(p.face>0 and 9 or -3),y=p.y+4,
+   vx=p.face*6,life=60,t=0})
+  playsfx("shuri")
+  p.shoot=6
+  p.anim=0
+ end
+ if p.y>300 then lose_life() end
+end
+
+function update_scrolls()
+ for s in all(scrolls) do
+  if not s.got then
+   if p.x+PWF>s.x-6 and p.x<s.x+5 and p.y+PHF>s.y-6 and p.y<s.y+5 then
+    s.got=true
+    score+=250
+    playsfx("scroll")
+    burst(s.x,s.y,20,10)
+    if s.id==1 then
+     p.s1=true
+     say("DASH: 2X ESQUERDA/DIREITA",210)
+    else
+     p.s2=true
+     say("PULO DUPLO: X NO AR",210)
+    end
+   end
+  end
+ end
+end
+
+function update_enemies()
+ for e in all(enemies) do
+  if not e.dead then
+   e.x+=e.dir*e.spd
+   if e.x<e.x1 then e.x=e.x1 e.dir=1 end
+   if e.x>e.x2 then e.x=e.x2 e.dir=-1 end
+   e.anim+=1
+   if p.inv<=0 and p.x+PWF>e.x+1 and p.x<e.x+15 and
+      p.y+PHF>e.y+1 and p.y<e.y+13 then
+    hurt(e)
+   end
+  end
+ end
+end
+
+function hurt(e)
+ if p.inv>0 then return end
+ lives-=1
+ p.inv=90
+ p.dash=0
+ shake=8
+ local d=sgn((p.x+5)-(e.x+8))
+ if d==0 then d=-p.face end
+ p.vx=d*4.2
+ p.vy=-2.8
+ burst(p.x+5,p.y+9,12,8)
+ if lives<=0 then
+  state="over"
+  stop_music()
+  playsfx("over")
+  tt=0
+ else
+  playsfx("hurt")
+  say("CUIDADO!",80)
+ end
+end
+
+function lose_life()
+ lives-=1
+ if lives<=0 then
+  state="over"
+  stop_music()
+  playsfx("over")
+  tt=0
+ else
+  playsfx("hurt")
+  p.x=check
+  p.y=190
+  p.vx=0
+  p.vy=0
+  p.dash=0
+  p.inv=90
+  p.ground=false
+  shake=6
+  burst(p.x+5,p.y+9,10,12)
+  say("TENTE DE NOVO",80)
+ end
+end
+
+function update_shuris()
+ for i=#shuris,1,-1 do
+  local s=shuris[i]
+  s.x+=s.vx
+  s.t+=1
+  s.life-=1
+  local dead=s.life<=0 or s.x<-8 or s.x>WW+8
+  if not dead then
+   if solid_at(flr((s.x+3)/TW),flr((s.y+3)/TW)) then
+    dead=true
+   else
+    for j=1,#enemies do
+     local e=enemies[j]
+     if not e.dead and s.x+6>e.x and s.x<e.x+16 and s.y+6>e.y and s.y<e.y+14 then
+      e.dead=true
+      score+=200
+      playsfx("kill")
+      burst(e.x+8,e.y+7,16,9)
+      dead=true
+      break
+     end
+    end
+   end
+  end
+  if dead then
+   burst(s.x+3,s.y+3,5,6)
+   deli(shuris,i)
+  end
+ end
+end
+
+function update_parts()
+ for i=#parts,1,-1 do
+  local q=parts[i]
+  q.x+=q.vx
+  q.y+=q.vy
+  q.vy+=.22
+  q.life-=1
+  if q.life<=0 or q.y>WH+20 then deli(parts,i) end
+ end
+ if #parts>170 then
+  for i=1,#parts-170 do deli(parts,1) end
+ end
+end
+
+function update_ambient()
+ for f in all(flies) do
+  f.p+=0.01*f.s
+  f.x+=cos(f.p+frame*0.01)*0.15
+  f.y+=sin(f.p*1.7)*0.18
+  if f.x<0 then f.x+=WW elseif f.x>WW then f.x-=WW end
+ end
+ for l in all(leaves) do
+  l.p+=0.01*l.s
+  l.x+=sin(l.p*2)*0.6-0.2
+  l.y+=0.25+l.s*0.2
+  if l.y>WH-30 then l.y=-5 l.x=rnd(WW) end
+ end
+end
+
+function _update()
+ frame+=1
+ update_sfx()
+ update_music()
+ if shake>0 then shake-=1 end
+
+ if state=="title" then
+  update_parts()
+  update_ambient()
+  if pressed(5) or pressed(4) then
+   newgame()
+   playsfx("start")
+  end
+  input_end()
+  return
+ end
+
+ if tt>0 then tt-=1 end
+ if prompt>0 then prompt-=1 end
+
+ if state~="play" then
+  if pressed(5) or pressed(4) then
+   newgame()
+   playsfx("start")
+  end
+  update_parts()
+  update_ambient()
+  input_end()
+  return
+ end
+
+ update_player()
+ if state=="play" then
+  update_scrolls()
+  update_enemies()
+  if state=="play" then
+   update_shuris()
+   if p.ground and p.x>868 and p.y<130 then
+    if p.s1 and p.s2 then
+     state="win"
+     score+=1000
+     stop_music()
+     playsfx("win")
+     tt=0
+     burst(p.x+5,p.y,40,10)
+    elseif prompt<=0 then
+     local falta=0
+     if not p.s1 then falta+=1 end
+     if not p.s2 then falta+=1 end
+     say("FALTA "..falta..(falta==1 and " PERGAMINHO" or " PERGAMINHOS"),120)
+     prompt=150
+    end
+   end
+  end
+ end
+
+ local target=mid(0,p.x+5-200,WW-SW)
+ cam+=(target-cam)*.12
+ if abs(cam-target)<.2 then cam=target end
+
+ update_parts()
+ update_ambient()
+ input_end()
+end
+
+-- ============================================================
+-- desenho
+-- ============================================================
+function draw_bg(cx)
+ blit(sky,get_draw_target(),0,0,0,0,SW,SH)
+ -- estrelas piscando
+ for i=1,9 do
+  local sx=(i*53+17)%SW
+  local sy=(i*31+9)%140
+  if ((frame\8)+i)%5~=0 then pset(sx,sy,(i%3==0) and 7 or 6) end
+ end
+ -- nuvens
+ for c in all(clouds) do
+  local x=(c.x-cx*0.08+frame*c.spd)%760-80
+  spr(c.ud,flr(x),c.y)
+ end
+ sspr(far,flr(cx*.12),0,SW,170,0,100,SW,170)
+ sspr(near,flr(cx*.35),0,SW,130,0,140,SW,130)
+end
+
+-- fundo do titulo
+function draw_title_scene()
+ draw_bg(0)
+ -- chao
+ rectfill(0,224,SW-1,SH-1,39)
+ rectfill(0,224,SW-1,226,C.grass2)
+ for x=0,SW-1 do
+  if (x*3)%13<5 then line(x,224,x,220+((x*7)%3),C.grass2) end
+ end
+ for i=0,8 do
+  local x=18+i*54+((i*17)%11)
+  rectfill(x,222,x+5,224,C.stone2)
+  pset(x+1,221,C.stone)
+  pset(x+4,222,C.stone)
+ end
+ draw_bamboo(18,224,71)
+ draw_bamboo(452,224,72)
+ draw_torii(402,224)
+ draw_ninja(300,206,-1,0,false,false)
+ -- vagalumes
+ for f in all(flies) do
+  local sx=flr(f.x%SW)
+  local sy=200+flr(f.y%40)
+  if (frame+f.p*20)%7<4 then
+   pset(sx,sy,26)
+   pset(sx+1,sy,42)
+  end
+ end
+ -- titulo
+ bigtext_shadow("NINJA",50,40,6,10)
+ smalltext_shadow("PERGAMINHOS",50,100,5,8)
+ print("PICOTRON EDITION",54,134,22)
+ if (frame\20)%2==0 then pset(54,132,7) pset(286,132,7) end
+ -- comecar
+ if (frame\26)%2==0 then
+  ctext("X PARA COMECAR",152,10)
+ else
+  ctext("X PARA COMECAR",152,7)
+ end
+ ctext("SETAS MOVER    X PULO    Z SHURIKEN",174,7)
+ ctext("M LIGA/DESLIGA O SOM",184,6)
+ -- rodape
+ ptext("SCOGAMES 2026",SW-96,SH-12,6)
+end
+function draw_world()
+ local cx=flr(cam)
+ if shake>0 then cx+=flr(sin(frame*1.9)*shake) end
+ cx=mid(0,cx,WW-SW)
+ draw_bg(cx)
+ sspr(levelbmp,cx,0,SW,SH,0,0,SW,SH)
+ camera(cx,0)
+ draw_lantern(464,224,check>400)
+ draw_torii(896,112)
+ for s in all(scrolls) do
+  if not s.got then draw_scroll(s) end
+ end
+ for e in all(enemies) do
+  if not e.dead then draw_enemy(e) end
+ end
+ for s in all(shuris) do draw_shuri(s) end
+ draw_parts()
+ -- vagalumes
+ for f in all(flies) do
+  if f.x>cx-8 and f.x<cx+SW+8 then
+   local sx=flr(f.x-cx)
+   local sy=flr(f.y)
+   local tw=(frame*0.07+f.p)%1
+   if tw<0.55 then
+    pset(sx,sy,(tw<0.25) and 26 or 10)
+    pset(sx+1,sy,C.grass2)
+   end
+  end
+ end
+ -- folhas
+ for l in all(leaves) do
+  if l.x>cx-4 and l.x<cx+SW+4 then
+   pset(flr(l.x-cx),flr(l.y),C.bamboo)
+   if l.s>0.5 then pset(flr(l.x-cx)+1,flr(l.y),C.bamboo2) end
+  end
+ end
+ if not (p.inv>0 and (frame\4)%2==0) then
+  draw_ninja(flr(p.x),flr(p.y),p.face,
+   (p.ground and abs(p.vx)>.2) and (flr(p.anim/5)%2+1) or 0,
+   not p.ground, p.dash>0)
+ end
+ camera()
+end
+
+function draw_mask(x,y,on)
+ local c=on and 7 or 5
+ rectfill(x+1,y,x+5,y,c)
+ rectfill(x,y+1,x+6,y+3,c)
+ pset(x+2,y+2,on and 0 or 4)
+ pset(x+4,y+2,on and 0 or 4)
+ pset(x+1,y+1,on and 8 or 5)
+ pset(x+5,y+1,on and 8 or 5)
+ pset(x+2,y+4,on and 8 or 4)
+ pset(x+3,y+5,on and 8 or 4)
+ pset(x+4,y+4,on and 8 or 4)
+end
+
+function draw_scroll_icon(x,y,on)
+ local paper=on and 7 or 5
+ local roll=on and 9 or 4
+ rectfill(x+1,y+1,x+7,y+8,paper)
+ rectfill(x,y,x+1,y+9,roll)
+ rectfill(x+7,y,x+8,y+9,roll)
+ if on then
+  line(x+3,y+4,x+6,y+4,21)
+  line(x+3,y+6,x+6,y+6,21)
+  pset(x+7,y+2,25)
+ else
+  line(x+3,y+5,x+6,y+5,4)
+ end
+end
+function draw_hud()
+ -- barra
+ blit(hudbar,get_draw_target(),0,0,0,0,SW,16)
+ for i=1,3 do
+  draw_mask(8+(i-1)*10,3,i<=lives)
+ end
+ local s="PONTOS "..string.format("%06d",score)
+ ptext(s,flr((SW-#s*5)/2),3,10)
+ draw_scroll_icon(436,3,p.s1)
+ draw_scroll_icon(452,3,p.s2)
+ if tt>0 then
+  local w=#toast*5+14
+  local x=flr((SW-w)/2)
+  rectfill(x,22,x+w,33,0)
+  rect(x,22,x+w,33,9)
+  pset(x,22,7) pset(x+w,33,7)
+  ptext(toast,x+7,25,7)
+ end
+ if muted then
+  ptext("MUDO",8,SH-12,6)
+ end
+end
+function draw_panel(x0,y0,x1,y1,c)
+ rectfill(x0,y0,x1,y1,0)
+ rect(x0,y0,x1,y1,c)
+ rect(x0+2,y0+2,x1-2,y1-2,33)
+ pset(x0,y0,7) pset(x1,y0,7) pset(x0,y1,7) pset(x1,y1,7)
+end
+
+function draw_overlay()
+ if state=="win" then
+  draw_panel(108,62,372,198,10)
+  ctext("TEMPLO ALCANCADO",78,10)
+  ctext("PONTOS "..score,96,7)
+  ctext("PERGAMINHOS 2/2",110,C.grass)
+  draw_scroll_icon(222,126,true)
+  draw_scroll_icon(240,126,true)
+  ctext("OBRIGADO POR JOGAR",142,6)
+  if (frame\26)%2==0 then ctext("X PARA REINICIAR",160,7) end
+  if frame%9==0 then
+   burst(110+rnd(270),70+rnd(60),10,(rnd(1)<.5) and 10 or 25)
+  end
+ elseif state=="over" then
+  draw_panel(120,74,360,196,8)
+  ctext("GAME OVER",90,8)
+  ctext("PONTOS "..score,108,7)
+  local n=(p.s1 and 1 or 0)+(p.s2 and 1 or 0)
+  ctext("PERGAMINHOS "..n.."/2",126,6)
+  if (frame\26)%2==0 then ctext("X PARA TENTAR DE NOVO",150,6) end
+ end
+end
+function _draw()
+ if state=="title" then
+  draw_title_scene()
+  return
+ end
+ draw_world()
+ draw_hud()
+ draw_overlay()
+ if shake>3 then
+  rect(0,0,SW-1,SH-1,8)
+  rect(1,1,SW-2,SH-2,8)
+  if shake>6 then rect(2,2,SW-3,SH-3,24) end
+ end
+end
+
+-- ============================================================
+-- boot
+-- ============================================================
+function _init()
+ poke(0x5f5c,255)
+ poke(0x5f5d,255)
+ set_palette()
+ init_audio()
+ srand(7)
+ sky=build_sky()
+ far=build_far()
+ near=build_near()
+ levelbmp=build_level()
+ hudbar=build_hudbar()
+ clouds={}
+ for i=1,4 do
+  add(clouds,{ud=build_cloud(),x=i*180+rnd(90),y=88+rnd(58),spd=0.06+rnd(.08)})
+ end
+ srand(4242)
+ newgame()
+ state="title"
+ stop_music()
+ music_on=true
+end
+
+:: [eoc]
