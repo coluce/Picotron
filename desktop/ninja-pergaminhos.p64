@@ -3,10 +3,11 @@ version 2
 
 :: main.lua
 -- ninja pergaminhos — picotron edition
--- setas: mover / x: pular / z ou o: shuriken
+-- mapa: setas andam pela trilha / x entra na fase
+-- fase: setas movem / x pula / z ou o: shuriken
 -- pergaminho 1: dash (2x <- ou ->) + controle melhor
 -- pergaminho 2: pulo duplo
--- 480x270, tiles 16x16, mundo 60x17 tiles (duas telas)
+-- 480x270, tiles 16x16, mapa 960x270 e duas fases 60x17 tiles
 -- arte, mapa e audio gerados por codigo: sem .gfx/.map/.sfx
 
 -- ============================================================
@@ -16,17 +17,24 @@ SW,SH=480,270
 TW=16
 MW,MH=60,17
 WW,WH=MW*TW,MH*TW
+MAPW,MAPH=960,270
 
 GRAV=0.24
 JUMP=-5.8
 PWF,PHF=10,18
 
--- paleta estendida (32..47 definidos no boot)
+-- paleta estendida (32..47 floresta, 48..63 neve, definidas no boot)
 C={
  sky0=32,sky1=33,sky2=34,sky3=35,sky4=36,
  moon=37,far=38,near=39,mist=40,
  grass=41,grass2=42,bamboo=43,bamboo2=44,
  stone=45,stone2=46,skin2=47,
+}
+SNOW={
+ sky0=48,sky1=49,sky2=50,sky3=51,sky4=52,
+ sun=53,far=54,near=55,mist=56,
+ snow=57,snow2=58,ice=59,ice2=60,
+ rock=61,rock2=62,warm=63,
 }
 
 -- ============================================================
@@ -50,6 +58,66 @@ level={
  "############...#######################...############%%%%%%%",
  "%%%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%",
  "%%%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%",
+}
+
+-- fase 2: pico nevado (mesmo tamanho, layout proprio)
+snowlevel={
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ "............................................................",
+ ".....................................................#######",
+ ".....................................................%%%%%%%",
+ "................................................==...%%%%%%%",
+ "..............................................====...%%%%%%%",
+ "................====......................====.......%%%%%%%",
+ ".....................................................%%%%%%%",
+ ".....................................................%%%%%%%",
+ "##########...############...##########...############%%%%%%%",
+ "%%%%%%%%%%...%%%%%%%%%%%%...%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%",
+ "%%%%%%%%%%...%%%%%%%%%%%%...%%%%%%%%%%...%%%%%%%%%%%%%%%%%%%",
+}
+
+-- tema visual dos tiles: floresta e neve
+-- fisica de gelo escorregadio nao implementada (evolucao futura; ver README)
+THEMES={
+ forest={snow=false,
+  earth=4,earth2=20,side=21,
+  grass=C.grass,grass2=C.grass2,
+  rock=21,rock2=C.stone2,rock_hi=C.stone,
+  plank=4,plank_top=9,plank_hi=10,plank_side=21},
+ snow={snow=true,
+  earth=SNOW.rock,earth2=SNOW.rock2,side=SNOW.rock2,
+  grass=SNOW.snow,grass2=SNOW.snow2,
+  rock=SNOW.rock,rock2=SNOW.rock2,rock_hi=SNOW.ice,
+  plank=SNOW.ice2,plank_top=SNOW.ice,plank_hi=SNOW.snow,plank_side=SNOW.rock},
+}
+
+LEVELS={
+ {name="TEMPLO DO CREPUSCULO",map=level,theme=THEMES.forest,tempo=10,
+  startx=24,starty=206,check_x=440,check_spawn=470,goal_x=868,goal_y=130,
+  torii_x=896,
+  scrolls={{x=100,y=160,id=1},{x=800,y=208,id=2}},
+  enemies={
+   {x=64,y=210,x1=48,x2=176,dir=1,spd=0.55},
+   {x=296,y=162,x1=290,x2=336,dir=-1,spd=0.45},
+   {x=448,y=146,x1=436,x2=474,dir=1,spd=0.4},
+   {x=540,y=210,x1=536,x2=600,dir=1,spd=0.6},
+   {x=672,y=210,x1=664,x2=768,dir=-1,spd=0.5},
+  }},
+ {name="PICO NEVADO",map=snowlevel,theme=THEMES.snow,tempo=12,
+  startx=24,starty=206,check_x=500,check_spawn=520,goal_x=868,goal_y=130,
+  torii_x=896,
+  scrolls={{x=100,y=160,id=1},{x=580,y=208,id=2}},
+  enemies={
+   {x=96,y=210,x1=48,x2=150,dir=1,spd=0.5},
+   {x=300,y=210,x1=224,x2=384,dir=-1,spd=0.55},
+   {x=540,y=210,x1=472,x2=592,dir=1,spd=0.5},
+   {x=700,y=210,x1=664,x2=816,dir=-1,spd=0.45},
+  }},
 }
 
 -- ============================================================
@@ -80,6 +148,7 @@ enemies={}
 scrolls={}
 flies={}
 leaves={}
+flakes={}
 p={}
 sky=nil
 far=nil
@@ -87,6 +156,25 @@ near=nil
 levelbmp=nil
 hudbar=nil
 clouds={}
+
+-- mapa / progressao
+curlevel=1
+curmap=level
+unlocked=1
+cleared={false,false}
+mapd=0
+mapx=0
+mapy=214
+mapface=1
+mapwalk=0
+mapcam=0
+mapnear=nil
+mapbmp=nil
+snowsky=nil
+snowfar=nil
+snownear=nil
+snowbmp=nil
+snowclouds={}
 
 -- ============================================================
 -- utilidades
@@ -110,6 +198,23 @@ function set_palette()
  cp(45,120,124,140)
  cp(46, 72, 76, 96)
  cp(47,196,110, 96)
+ -- neve (48..63)
+ cp(48, 10, 18, 42)
+ cp(49, 18, 32, 64)
+ cp(50, 32, 56, 92)
+ cp(51, 64, 96,128)
+ cp(52,120,156,180)
+ cp(53,255,250,235)
+ cp(54, 48, 70,104)
+ cp(55, 36, 54, 84)
+ cp(56,140,170,200)
+ cp(57,250,252,255)
+ cp(58,200,220,240)
+ cp(59,140,210,235)
+ cp(60, 80,150,190)
+ cp(61, 50, 66, 92)
+ cp(62, 36, 48, 72)
+ cp(63,255,180,120)
 end
 
 function usetarget(ud)
@@ -195,6 +300,81 @@ end
 function smalltext_shadow(s,x,y,sc,c)
  smalltext(s,x+2,y+2,sc,0)
  smalltext(s,x,y,sc,c)
+end
+
+-- ============================================================
+-- trilha do mapa (polilinha com distancia acumulada)
+-- ============================================================
+MAPPATH={
+ {x=48,y=214},{x=120,y=214},{x=170,y=206},{x=230,y=198},
+ {x=300,y=192}, -- no 1
+ {x=380,y=192},{x=450,y=200},{x=520,y=206},{x=600,y=200},
+ {x=670,y=186},{x=740,y=170},{x=820,y=154},{x=880,y=146}, -- no 2
+}
+MAPSEG={}
+MAPD={}
+MAPNODES={}
+MAPPATHY={}
+MAPLEN=0
+
+function build_mappath()
+ MAPSEG={}
+ MAPD={0}
+ MAPLEN=0
+ for i=1,#MAPPATH-1 do
+  local a,b=MAPPATH[i],MAPPATH[i+1]
+  local dx,dy=b.x-a.x,b.y-a.y
+  local len=sqrt(dx*dx+dy*dy)
+  MAPSEG[i]={x=a.x,y=a.y,dx=dx,dy=dy,len=len,d=MAPLEN}
+  MAPLEN+=len
+  MAPD[i+1]=MAPLEN
+ end
+ MAPNODES={
+  {id=1,x=MAPPATH[5].x,y=MAPPATH[5].y,d=MAPD[5]},
+  {id=2,x=MAPPATH[13].x,y=MAPPATH[13].y,d=MAPD[13]},
+ }
+ MAPPATHY={}
+ for x=0,MAPW-1 do MAPPATHY[x]=path_y_at_x(x) end
+end
+
+function map_path_at(d)
+ d=mid(0,d,MAPLEN)
+ for i=1,#MAPSEG do
+  local s=MAPSEG[i]
+  if d<=s.d+s.len or i==#MAPSEG then
+   local t=(d-s.d)/s.len
+   return s.x+s.dx*t,s.y+s.dy*t
+  end
+ end
+ return MAPPATH[1].x,MAPPATH[1].y
+end
+
+function path_y_at_x(x)
+ local a=MAPPATH[1]
+ if x<=a.x then return a.y end
+ local b=MAPPATH[#MAPPATH]
+ if x>=b.x then return b.y end
+ for i=1,#MAPSEG do
+  local s=MAPSEG[i]
+  if x>=s.x and x<=s.x+s.dx then
+   return s.y+s.dy*((x-s.x)/s.dx)
+  end
+ end
+ return b.y
+end
+
+function copy_scrolls(src)
+ local t={}
+ for s in all(src) do t[#t+1]={x=s.x,y=s.y,id=s.id,got=false} end
+ return t
+end
+
+function copy_enemies(src)
+ local t={}
+ for e in all(src) do
+  t[#t+1]={x=e.x,y=e.y,x1=e.x1,x2=e.x2,dir=e.dir,spd=e.spd,anim=0,dead=false}
+ end
+ return t
 end
 
 -- ============================================================
@@ -305,6 +485,8 @@ SND={
  win={{6,60,32,1},{6,64,32,1},{6,67,30,1},{6,72,28,1},{8,76,26,3},{8,79,24,3},{12,84,20,3}},
  over={{6,48,30,2},{6,43,26,2},{6,36,22,2},{6,31,18,2},{12,24,12,2}},
  start={{3,67,30,1},{3,72,26,1},{6,79,20,3}},
+ enter={{2,67,30,1},{2,72,25,1},{4,79,20,1}},
+ deny={{3,45,28,2},{3,39,20,2}},
 }
 
 MEL={69,0,72,0,76,0,72,0, 69,0,67,0,64,0,67,0,
@@ -382,17 +564,25 @@ end
 -- ============================================================
 -- mapa e colisao
 -- ============================================================
-function tileat(tx,ty)
+function tileat_map(map,tx,ty)
  if ty<0 or ty>=MH or tx<0 or tx>=MW then return "." end
- return sub(level[ty+1],tx+1,tx+1)
+ return sub(map[ty+1],tx+1,tx+1)
 end
 
-function solid_at(tx,ty)
+function solid_at_map(map,tx,ty)
  if tx<0 or tx>=MW then return true end
  if ty<0 then return true end
  if ty>=MH then return false end
- local c=tileat(tx,ty)
+ local c=tileat_map(map,tx,ty)
  return c=="#" or c=="%" or c=="="
+end
+
+function tileat(tx,ty)
+ return tileat_map(curmap,tx,ty)
+end
+
+function solid_at(tx,ty)
+ return solid_at_map(curmap,tx,ty)
 end
 
 function hit(x,y,w,h)
@@ -574,81 +764,254 @@ function build_cloud()
  return ud
 end
 
--- ---------- tiles ----------
-function draw_earth(x,y,tx,ty)
- srand(tx*97+ty*13+3)
- local top=not solid_at(tx,ty-1)
- rectfill(x,y,x+15,y+15,4)
- if top then
-  local gc=(rnd(1)<0.35) and C.grass2 or C.grass
-  rectfill(x,y,x+15,y+2,gc)
-  rectfill(x,y+3,x+15,y+3,C.grass2)
-  for i=0,15 do
-   if ((i*7+tx*5)%6)<2 then pset(x+i,y+4,C.grass2) end
+-- ---------- ceu e parallax de neve ----------
+function build_snow_sky()
+ local ud=userdata("u8",SW,SH)
+ usetarget(ud)
+ local bands={
+  {0,50,SNOW.sky0},{50,105,SNOW.sky1},{105,155,SNOW.sky2},
+  {155,205,SNOW.sky3},{205,SH,SNOW.sky4},
+ }
+ for b in all(bands) do rectfill(0,b[1],SW-1,b[2]-1,b[3]) end
+ for i=1,#bands-1 do
+  local y=bands[i][2]
+  dither_band(y-4,y-1,bands[i][3],bands[i+1][3])
+ end
+ -- aurora
+ for k=0,2 do
+  for x=0,SW-1 do
+   local y=30+k*20+flr(sin(x/70+k)*9+sin(x/23+k*2)*3)
+   pset(x,y,SNOW.ice)
+   if (x+k)%3==0 then pset(x,y+1,SNOW.ice2) end
   end
-  for i=0,5 do
-   local bx=x+flr(rnd(16))
-   line(bx,y-1-flr(rnd(2)),bx,y,C.grass)
-   if rnd(1)<0.4 then pset(bx+1,y-1,C.grass2) end
+ end
+ -- estrelas
+ srand(41)
+ for i=1,95 do
+  local x=flr(rnd(SW))
+  local y=flr(rnd(150))
+  if rnd(1)<0.7 then pset(x,y,7) else pset(x,y,SNOW.snow) end
+ end
+ -- lua baixa com halo
+ local mx,my,mr=388,66,22
+ srand(99)
+ for i=1,760 do
+  local a=rnd(1)
+  local rr=mr+2+rnd(1)*26
+  local x=flr(mx+cos(a)*rr)
+  local y=flr(my+sin(a)*rr)
+  if rnd(1)<(1-(rr-mr)/30)*0.6 then
+   pset(x,y,(i%3==0) and SNOW.ice or SNOW.mist)
+  end
+ end
+ circfill(mx,my,mr,SNOW.sun)
+ dither(mx-14,my+4,mx-6,my+12,SNOW.snow2,0)
+ dither(mx+3,my-11,mx+10,my-4,SNOW.snow2,1)
+ -- nuvens finas
+ srand(17)
+ for i=1,4 do
+  local y=112+i*14+flr(rnd(6))
+  local x=flr(rnd(SW))
+  local w=60+flr(rnd(90))
+  dither(x,y,x+w,y+2,SNOW.mist,0)
+  pset(x+4,y+3,SNOW.snow2)
+ end
+ usetarget(nil)
+ return ud
+end
+
+function build_snow_far()
+ local w,h=720,170
+ local ud=userdata("u8",w,h)
+ usetarget(ud)
+ cls(0)
+ srand(303)
+ local function ry(x) return flr(104+sin(x/210)*22+sin(x/79+0.7)*8+sin(x/29+1.3)*3) end
+ for x=0,w-1 do
+  local y=ry(x)
+  line(x,y,x,h-1,SNOW.far)
+  pset(x,y,SNOW.snow2)
+  if (x+y)%4==0 then pset(x,y+1,SNOW.mist) end
+  if y<96 then pset(x,y+2,SNOW.snow) end
+ end
+ -- picos recortados
+ for i=1,7 do
+  local px=40+i*92+flr(rnd(30))
+  local ph=38+flr(rnd(46))
+  local base=ry(px)
+  for y=base-ph,base do
+   local ww=flr((y-(base-ph))*0.7)
+   line(px-ww,y,px+ww,y,SNOW.far)
+  end
+  for y=base-ph,base-ph+18 do
+   local ww=flr((y-(base-ph))*0.7)
+   line(px-ww,y,px+ww,y,SNOW.snow)
+  end
+ end
+ usetarget(nil)
+ return ud
+end
+
+function build_snow_near()
+ local w,h=720,130
+ local ud=userdata("u8",w,h)
+ usetarget(ud)
+ cls(0)
+ srand(404)
+ local function ry(x) return flr(74+sin(x/160+0.4)*16+sin(x/61+2)*7+sin(x/27+0.8)*3) end
+ for x=0,w-1 do
+  local y=ry(x)
+  line(x,y,x,h-1,SNOW.near)
+  pset(x,y,SNOW.far)
+  if y<62 then pset(x,y+1,SNOW.snow2) end
+ end
+ for i=1,24 do
+  local x=flr(rnd(w))
+  local y=ry(x)
+  draw_pine(x,y+2,500+i*13,true)
+ end
+ usetarget(nil)
+ return ud
+end
+
+function build_snow_cloud()
+ local ud=userdata("u8",72,22)
+ usetarget(ud)
+ cls(0)
+ srand(6)
+ for i=0,5 do
+  local x=6+i*10+flr(rnd(6))
+  local y=12+flr(rnd(4))-i%2*3
+  local r=4+flr(rnd(5))
+  circfill(x,y,r,SNOW.mist)
+  circfill(x-2,y-2,r-2,SNOW.snow2)
+ end
+ dither(2,15,69,20,SNOW.snow2,0)
+ usetarget(nil)
+ return ud
+end
+
+-- ---------- tiles ----------
+function draw_earth(x,y,tx,ty,map,th)
+ srand(tx*97+ty*13+3)
+ local top=not solid_at_map(map,tx,ty-1)
+ rectfill(x,y,x+15,y+15,th.earth)
+ if top then
+  local gc=(rnd(1)<0.35) and th.grass2 or th.grass
+  if th.snow then
+   rectfill(x,y,x+15,y+4,gc)
+   rectfill(x,y+5,x+15,y+5,th.grass2)
+   -- acumulos de neve
+   for i=0,15 do
+    if ((i*5+tx*3)%7)<3 then pset(x+i,y+6,th.grass) end
+   end
+   for i=0,5 do
+    local bx=x+flr(rnd(16))
+    local by=y+1+flr(rnd(4))
+    line(bx,by,bx+2,by,th.grass)
+   end
+   if rnd(1)<0.4 then
+    local px=x+2+flr(rnd(12))
+    pset(px,y+7,SNOW.ice)
+    pset(px,y+8,SNOW.ice2)
+   end
+  else
+   rectfill(x,y,x+15,y+2,gc)
+   rectfill(x,y+3,x+15,y+3,th.grass2)
+   for i=0,15 do
+    if ((i*7+tx*5)%6)<2 then pset(x+i,y+4,th.grass2) end
+   end
+   for i=0,5 do
+    local bx=x+flr(rnd(16))
+    line(bx,y-1-flr(rnd(2)),bx,y,th.grass)
+    if rnd(1)<0.4 then pset(bx+1,y-1,th.grass2) end
+   end
   end
  else
-  rectfill(x,y,x+15,y+15,4)
+  rectfill(x,y,x+15,y+15,th.earth)
+  if th.snow then
+   for i=1,6 do
+    local px=x+flr(rnd(16))
+    local py=y+2+flr(rnd(12))
+    if rnd(1)<0.5 then pset(px,py,SNOW.snow2) end
+   end
+  end
  end
  for i=1,7 do
   local px=x+flr(rnd(16))
-  local py=y+(top and 6 or 1)+flr(rnd(10))
-  pset(px,py,20)
-  if rnd(1)<0.3 then pset(px+1,py,20) end
+  local py=y+(top and (th.snow and 8 or 6) or 1)+flr(rnd(10))
+  pset(px,py,th.earth2)
+  if rnd(1)<0.3 then pset(px+1,py,th.earth2) end
  end
  if rnd(1)<0.45 then
   local px=x+2+flr(rnd(11))
   local py=y+7+flr(rnd(7))
-  rectfill(px,py,px+1,py+1,C.stone2)
+  rectfill(px,py,px+1,py+1,th.rock2)
  end
- if not solid_at(tx-1,ty) then rectfill(x,y,x+1,y+15,21) end
- if not solid_at(tx+1,ty) then rectfill(x+14,y,x+15,y+15,21) end
+ if not solid_at_map(map,tx-1,ty) then rectfill(x,y,x+1,y+15,th.side) end
+ if not solid_at_map(map,tx+1,ty) then rectfill(x+14,y,x+15,y+15,th.side) end
 end
 
-function draw_rock(x,y,tx,ty)
+function draw_rock(x,y,tx,ty,map,th)
  srand(tx*61+ty*29+7)
- rectfill(x,y,x+15,y+15,21)
+ rectfill(x,y,x+15,y+15,th.rock)
  for i=0,3 do
   local px=x+flr(rnd(13))
   local py=y+flr(rnd(13))
   local w=2+flr(rnd(3))
-  rectfill(px,py,px+w,py+1,C.stone2)
-  pset(px,py,C.stone)
+  rectfill(px,py,px+w,py+1,th.rock2)
+  pset(px,py,th.rock_hi)
  end
  if rnd(1)<0.5 then
   local px=x+flr(rnd(12))
-  line(px,y+2,px+2,y+8,20)
-  pset(px+1,y+9,20)
+  line(px,y+2,px+2,y+8,th.earth2)
+  pset(px+1,y+9,th.earth2)
  end
- if not solid_at(tx,ty-1) then
-  line(x,y,x+15,y,C.stone)
-  pset(x,y,C.grass2)
+ if not solid_at_map(map,tx,ty-1) then
+  line(x,y,x+15,y,th.rock_hi)
+  pset(x,y,th.grass2)
+  if th.snow then
+   rectfill(x,y,x+15,y+1,th.grass)
+   for i=0,15 do
+    if ((i*3+tx)%5)<2 then pset(x+i,y+2,th.grass) end
+   end
+   if rnd(1)<0.5 then
+    local px=x+2+flr(rnd(12))
+    pset(px,y+3,SNOW.snow)
+   end
+  end
  end
- if not solid_at(tx-1,ty) then rectfill(x,y,x+1,y+15,20) end
- if not solid_at(tx+1,ty) then rectfill(x+14,y,x+15,y+15,20) end
+ if not solid_at_map(map,tx-1,ty) then rectfill(x,y,x+1,y+15,th.earth2) end
+ if not solid_at_map(map,tx+1,ty) then rectfill(x+14,y,x+15,y+15,th.earth2) end
 end
 
-function draw_plank(x,y,tx,ty)
- local left=tileat(tx-1,ty)~="="
- local right=tileat(tx+1,ty)~="="
- rectfill(x,y+3,x+15,y+11,4)
- rectfill(x,y+3,x+15,y+4,9)
- line(x,y,x+15,y,10)
- line(x,y+1,x+15,y+1,9)
- rectfill(x,y+9,x+15,y+11,20)
- line(x,y+12,x+15,y+12,21)
- -- veios
- line(x+5,y+5,x+5,y+8,20)
- line(x+11,y+5,x+11,y+8,20)
- pset(x+2,y+6,25)
- pset(x+9,y+7,25)
- if left then rectfill(x,y,x+1,y+11,21) end
- if right then rectfill(x+14,y,x+15,y+11,21) end
- pset(x+2,y+3,6) pset(x+13,y+3,6)
+function draw_plank(x,y,tx,ty,map,th)
+ local left=tileat_map(map,tx-1,ty)~="="
+ local right=tileat_map(map,tx+1,ty)~="="
+ rectfill(x,y+3,x+15,y+11,th.plank)
+ rectfill(x,y+3,x+15,y+4,th.plank_top)
+ line(x,y,x+15,y,th.plank_hi)
+ line(x,y+1,x+15,y+1,th.plank_top)
+ rectfill(x,y+9,x+15,y+11,th.earth2)
+ line(x,y+12,x+15,y+12,th.side)
+ if th.snow then
+  -- facetas de gelo
+  line(x+3,y+5,x+7,y+8,th.plank_hi)
+  line(x+9,y+5,x+13,y+9,th.plank_hi)
+  pset(x+2,y+6,SNOW.snow)
+  pset(x+12,y+7,SNOW.snow)
+  pset(x+6,y+9,SNOW.ice)
+ else
+  -- veios de madeira
+  line(x+5,y+5,x+5,y+8,th.earth2)
+  line(x+11,y+5,x+11,y+8,th.earth2)
+  pset(x+2,y+6,25)
+  pset(x+9,y+7,25)
+ end
+ if left then rectfill(x,y,x+1,y+11,th.side) end
+ if right then rectfill(x+14,y,x+15,y+11,th.side) end
+ pset(x+2,y+3,th.snow and SNOW.snow or 6)
+ pset(x+13,y+3,th.snow and SNOW.snow or 6)
 end
 
 function draw_bamboo(bx,base,seed)
@@ -671,6 +1034,30 @@ function draw_bamboo(bx,base,seed)
  end
 end
 
+function draw_pine(bx,base,seed,snow)
+ srand(seed)
+ local h=26+flr(rnd(38))
+ local trunk=snow and SNOW.rock2 or 20
+ local branch=snow and SNOW.near or C.near
+ local tip=snow and SNOW.snow or C.bamboo2
+ rectfill(bx-1,base-h+10,bx+1,base-1,trunk)
+ for k=0,3 do
+  local yy=base-h+10+k*flr(h/5)
+  local w=3+k*3
+  line(bx-w,yy,bx+w,yy,branch)
+  line(bx-w+1,yy+1,bx+w-1,yy+1,snow and SNOW.rock or C.bamboo2)
+  if snow then
+   line(bx-w+1,yy-1,bx+w-1,yy-1,SNOW.snow)
+   pset(bx-2,yy-1,SNOW.snow)
+   pset(bx+2,yy-1,SNOW.snow)
+  else
+   line(bx-w+1,yy-1,bx+w-1,yy-1,C.bamboo)
+  end
+ end
+ line(bx,base-h,bx,base-h+10,tip)
+ if snow then pset(bx,base-h-1,SNOW.snow) end
+end
+
 function build_hudbar()
  local ud=userdata("u8",SW,16)
  usetarget(ud)
@@ -682,36 +1069,63 @@ function build_hudbar()
  return ud
 end
 
-function build_level()
+function build_level(map,th)
  local ud=userdata("u8",WW,WH)
  usetarget(ud)
  cls(0)
  for ty=0,MH-1 do
   for tx=0,MW-1 do
-   local c=tileat(tx,ty)
+   local c=tileat_map(map,tx,ty)
    local x,y=tx*TW,ty*TW
-   if c=="#" then draw_earth(x,y,tx,ty)
-   elseif c=="%" then draw_rock(x,y,tx,ty)
-   elseif c=="=" then draw_plank(x,y,tx,ty) end
+   if c=="#" then draw_earth(x,y,tx,ty,map,th)
+   elseif c=="%" then draw_rock(x,y,tx,ty,map,th)
+   elseif c=="=" then draw_plank(x,y,tx,ty,map,th) end
   end
  end
- -- bambuzais de fundo
- srand(9)
- for i=1,14 do
-  local tx=flr(rnd(MW))
-  if tileat(tx,14)=="#" and not solid_at(tx,13) and not solid_at(tx,12) then
-   draw_bamboo(tx*TW+flr(rnd(8)),224,i*17)
+ if th.snow then
+  -- pinheiros nevados
+  srand(77)
+  for i=1,18 do
+   local tx=flr(rnd(MW))
+   if tileat_map(map,tx,14)=="#" and not solid_at_map(map,tx,13) then
+    draw_pine(tx*TW+flr(rnd(10)),224,i*31,true)
+   end
   end
- end
- -- tufos e pedrinhas no chao
- srand(55)
- for tx=0,MW-1 do
-  if tileat(tx,14)=="#" then
-   for k=1,2 do
+  -- acumulos e cristais de gelo no chao
+  srand(88)
+  for tx=0,MW-1 do
+   if tileat_map(map,tx,14)=="#" then
     if rnd(1)<0.5 then
      local x=tx*TW+flr(rnd(14))
-     line(x,223,x,221,C.grass2)
-     pset(x+1,221,C.grass)
+     rectfill(x,222,x+2,224,SNOW.snow)
+     pset(x+1,221,SNOW.snow2)
+    end
+    if rnd(1)<0.25 then
+     local x=tx*TW+flr(rnd(14))
+     line(x,223,x,220,SNOW.ice)
+     pset(x+1,220,SNOW.snow)
+    end
+   end
+  end
+ else
+  -- bambuzais de fundo
+  srand(9)
+  for i=1,14 do
+   local tx=flr(rnd(MW))
+   if tileat_map(map,tx,14)=="#" and not solid_at_map(map,tx,13) and not solid_at_map(map,tx,12) then
+    draw_bamboo(tx*TW+flr(rnd(8)),224,i*17)
+   end
+  end
+  -- tufos e pedrinhas no chao
+  srand(55)
+  for tx=0,MW-1 do
+   if tileat_map(map,tx,14)=="#" then
+    for k=1,2 do
+     if rnd(1)<0.5 then
+      local x=tx*TW+flr(rnd(14))
+      line(x,223,x,221,C.grass2)
+      pset(x+1,221,C.grass)
+     end
     end
    end
   end
@@ -805,36 +1219,44 @@ function draw_ninja(x,y,d,run,air,dash)
  end
 end
 function draw_enemy(e)
+ local snow=curlevel==2
+ local c_tail=snow and SNOW.snow2 or 21
+ local c_body=snow and SNOW.ice2 or 2
+ local c_hi=snow and SNOW.snow or 18
+ local c_dark=snow and SNOW.rock or 2
+ local c_horn=snow and SNOW.snow or 6
+ local c_eye=snow and SNOW.ice or 25
+ local c_pupil=snow and SNOW.rock2 or 10
  local x=flr(e.x)
  local y=flr(e.y)+flr(sin(frame*0.07+e.x*0.09)*1.5)
  -- cauda espectral
  for i=0,2 do
   local w=6-i*2
   local yy=y+12+i*2
-  rectfill(x+8-w,yy,x+7+w,yy+1,21)
-  if i==0 then pset(x+5,yy,2) pset(x+10,yy,2) end
+  rectfill(x+8-w,yy,x+7+w,yy+1,c_tail)
+  if i==0 then pset(x+5,yy,c_body) pset(x+10,yy,c_body) end
  end
  -- corpo
- ovalfill(x+1,y+1,x+14,y+12,2)
- ovalfill(x+2,y+2,x+13,y+7,18)
- ovalfill(x+3,y+3,x+12,y+6,2)
+ ovalfill(x+1,y+1,x+14,y+12,c_body)
+ ovalfill(x+2,y+2,x+13,y+7,c_hi)
+ ovalfill(x+3,y+3,x+12,y+6,c_dark)
  -- chifres
- line(x+2,y+2,x,y-2,6)
- line(x+3,y+1,x+1,y-2,6)
- line(x+13,y+2,x+15,y-2,6)
- line(x+12,y+1,x+14,y-2,6)
+ line(x+2,y+2,x,y-2,c_horn)
+ line(x+3,y+1,x+1,y-2,c_horn)
+ line(x+13,y+2,x+15,y-2,c_horn)
+ line(x+12,y+1,x+14,y-2,c_horn)
  -- olhos
  local blink=((frame+flr(e.x))%113)>105
- circfill(x+5,y+6,2,25)
- circfill(x+10,y+6,2,25)
+ circfill(x+5,y+6,2,c_eye)
+ circfill(x+10,y+6,2,c_eye)
  if not blink then
-  pset(x+5,y+6,10) pset(x+10,y+6,10)
+  pset(x+5,y+6,c_pupil) pset(x+10,y+6,c_pupil)
   pset(x+5,y+6,7) pset(x+10,y+6,7)
  end
  -- boca
- rectfill(x+6,y+10,x+9,y+10,24)
- pset(x+5,y+10,21) pset(x+10,y+10,21)
- pset(x+1,y+8,21) pset(x+14,y+8,21)
+ rectfill(x+6,y+10,x+9,y+10,snow and SNOW.ice or 24)
+ pset(x+5,y+10,c_tail) pset(x+10,y+10,c_tail)
+ pset(x+1,y+8,c_tail) pset(x+14,y+8,c_tail)
 end
 
 function draw_scroll(s)
@@ -945,6 +1367,63 @@ function draw_torii(cx,base)
  dither(cx-34,base-8,cx+34,base-2,25,0)
 end
 
+function draw_snow_torii(cx,base)
+ -- halo gelado
+ if (frame\16)%2==0 then
+  circ(cx,base-34,36,SNOW.ice2)
+  circ(cx,base-34,42,SNOW.ice)
+ end
+ -- pilares
+ rectfill(cx-29,base-62,cx-21,base-1,SNOW.ice2)
+ rectfill(cx-29,base-62,cx-29,base-1,SNOW.rock)
+ rectfill(cx-25,base-62,cx-24,base-1,SNOW.snow2)
+ rectfill(cx+20,base-62,cx+28,base-1,SNOW.ice2)
+ rectfill(cx+28,base-62,cx+28,base-1,SNOW.rock)
+ rectfill(cx+22,base-62,cx+23,base-1,SNOW.snow2)
+ -- bases de pedra
+ rectfill(cx-32,base-3,cx-18,base-1,SNOW.rock)
+ rectfill(cx+17,base-3,cx+31,base-1,SNOW.rock)
+ line(cx-32,base-3,cx-18,base-3,SNOW.snow)
+ line(cx+17,base-3,cx+31,base-3,SNOW.snow)
+ -- viga superior
+ rectfill(cx-40,base-66,cx+40,base-60,SNOW.ice2)
+ rectfill(cx-40,base-66,cx+40,base-65,SNOW.snow)
+ rectfill(cx-40,base-61,cx+40,base-60,SNOW.rock)
+ line(cx-42,base-66,cx+42,base-66,SNOW.snow2)
+ line(cx-42,base-66,cx-44,base-68,SNOW.snow2)
+ line(cx+42,base-66,cx+44,base-68,SNOW.snow2)
+ -- segunda viga
+ rectfill(cx-31,base-52,cx+31,base-49,SNOW.ice2)
+ rectfill(cx-31,base-52,cx+31,base-52,SNOW.snow)
+ rectfill(cx-31,base-49,cx+31,base-49,SNOW.rock)
+ -- placa
+ rectfill(cx-9,base-62,cx+9,base-53,SNOW.rock)
+ line(cx-9,base-62,cx+9,base-62,SNOW.snow2)
+ line(cx-9,base-53,cx+9,base-53,SNOW.snow2)
+ line(cx-9,base-62,cx-9,base-53,SNOW.snow2)
+ line(cx+9,base-62,cx+9,base-53,SNOW.snow2)
+ line(cx-3,base-60,cx-3,base-55,SNOW.ice)
+ line(cx-3,base-60,cx+3,base-55,SNOW.ice)
+ line(cx+3,base-60,cx+3,base-55,SNOW.ice)
+ -- corda sagrada
+ for i=-26,26,4 do
+  line(cx+i,base-47,cx+i+2,base-45,SNOW.snow)
+  line(cx+i+2,base-45,cx+i+4,base-47,SNOW.snow)
+ end
+ line(cx-5,base-47,cx-5,base-42,SNOW.snow)
+ line(cx+5,base-47,cx+5,base-42,SNOW.snow)
+ pset(cx-5,base-41,SNOW.snow) pset(cx+5,base-41,SNOW.snow)
+ -- pingentes de gelo
+ for i=-30,30,10 do
+  local h=3+((i+30)\10)%3
+  line(cx+i,base-60,cx+i,base-60+h,SNOW.snow2)
+  pset(cx+i,base-60+h,SNOW.snow)
+ end
+ -- neve acumulada e reflexo
+ dither(cx-38,base-67,cx+38,base-64,SNOW.snow,0)
+ dither(cx-34,base-8,cx+34,base-2,SNOW.snow2,0)
+end
+
 function draw_lantern(cx,base,lit)
  rectfill(cx-7,base-3,cx+7,base-1,45)
  line(cx-7,base-3,cx+7,base-3,5)
@@ -970,48 +1449,168 @@ function draw_lantern(cx,base,lit)
  end
 end
 
+function draw_snow_lantern(cx,base,lit)
+ rectfill(cx-7,base-3,cx+7,base-1,SNOW.rock)
+ line(cx-7,base-3,cx+7,base-3,SNOW.rock2)
+ rectfill(cx-3,base-11,cx+3,base-4,SNOW.rock2)
+ rectfill(cx-3,base-11,cx-3,base-4,SNOW.rock)
+ rectfill(cx-6,base-19,cx+6,base-12,SNOW.rock)
+ rectfill(cx-5,base-18,cx+5,base-13,lit and SNOW.warm or SNOW.rock2)
+ rectfill(cx-8,base-22,cx+8,base-20,SNOW.rock2)
+ line(cx-9,base-22,cx+9,base-22,SNOW.rock)
+ pset(cx,base-23,SNOW.rock)
+ rectfill(cx-9,base-19,cx+9,base-19,SNOW.rock)
+ -- neve acumulada no topo
+ rectfill(cx-8,base-22,cx+8,base-21,SNOW.snow)
+ pset(cx-9,base-21,SNOW.snow2) pset(cx+9,base-21,SNOW.snow2)
+ if lit then
+  pset(cx,base-16,SNOW.snow)
+  pset(cx,base-15,SNOW.warm)
+  pset(cx-1,base-14,SNOW.warm)
+  pset(cx+1,base-14,SNOW.warm)
+  circ(cx,base-16,7,SNOW.warm)
+  circ(cx,base-16,12,SNOW.ice)
+  dither(cx-9,base-24,cx+9,base-8,SNOW.warm,1)
+  pset(cx-3,base-16,SNOW.warm) pset(cx+3,base-16,SNOW.warm)
+ else
+  pset(cx-2,base-16,SNOW.rock2)
+ end
+end
+
 -- ============================================================
 -- estado do jogo
 -- ============================================================
-function newgame()
+function newrun()
  score=0
+ lives=3
+ cleared={false,false}
+ unlocked=1
+ curlevel=1
+ curmap=level
+ cam=0
+ check=24
+ shake=0
+ prompt=0
+ tt=0
+ parts={}
+ shuris={}
+ enemies={}
+ scrolls={}
+ flies={}
+ leaves={}
+ flakes={}
+ mapd=0
+ mapface=1
+ mapwalk=0
+ mapnear=nil
+ mapx,mapy=map_path_at(0)
+ mapcam=mid(0,mapx-SW/2,MAPW-SW)
+ state="map"
+ stop_music()
+ music_on=true
+ mtempo=14
+ mtick=0
+ mstep=0
+ poke(0x5538,muted and 0 or 0x40)
+ poke(0x5539,muted and 0 or 0x40)
+ say("SETAS ANDAR   X ENTRAR",180)
+end
+
+function enter_level(id,silent)
+ curlevel=id
+ local cfg=LEVELS[id]
+ curmap=cfg.map
  lives=3
  cam=0
  check=24
  shake=0
  prompt=0
  tt=0
- p={x=24,y=206,vx=0,vy=0,face=1,ground=false,inv=0,coyote=0,jumps=0,jbuf=0,
-    s1=false,s2=false,dash=0,dashcd=0,shoot=0,anim=0,ltap=-99,rtap=-99}
- scrolls={
-  {x=100,y=160,id=1,got=false},
-  {x=800,y=208,id=2,got=false},
- }
- enemies={
-  {x=64,y=210,x1=48,x2=176,dir=1,spd=0.55,anim=0,dead=false},
-  {x=296,y=162,x1=290,x2=336,dir=-1,spd=0.45,anim=0,dead=false},
-  {x=448,y=146,x1=436,x2=474,dir=1,spd=0.4,anim=0,dead=false},
-  {x=540,y=210,x1=536,x2=600,dir=1,spd=0.6,anim=0,dead=false},
-  {x=672,y=210,x1=664,x2=768,dir=-1,spd=0.5,anim=0,dead=false},
- }
+ mapnear=nil
+ p={x=cfg.startx,y=cfg.starty,vx=0,vy=0,face=1,ground=false,inv=0,
+    coyote=0,jumps=0,jbuf=0,s1=false,s2=false,dash=0,dashcd=0,
+    shoot=0,anim=0,ltap=-99,rtap=-99}
+ scrolls=copy_scrolls(cfg.scrolls)
+ enemies=copy_enemies(cfg.enemies)
  shuris={}
  parts={}
  flies={}
  leaves={}
- srand(4242)
- for i=1,16 do
-  add(flies,{x=rnd(WW),y=200+rnd(60),p=rnd(1),s=0.2+rnd(.3)})
- end
- for i=1,10 do
-  add(leaves,{x=rnd(WW),y=rnd(WH),s=0.3+rnd(.5),p=rnd(1)})
+ flakes={}
+ if id==1 then
+  srand(4242)
+  for i=1,16 do
+   add(flies,{x=rnd(WW),y=200+rnd(60),p=rnd(1),s=0.2+rnd(.3)})
+  end
+  for i=1,10 do
+   add(leaves,{x=rnd(WW),y=rnd(WH),s=0.3+rnd(.5),p=rnd(1)})
+  end
+ else
+  srand(5151)
+  for i=1,110 do
+   add(flakes,{x=rnd(WW),y=rnd(WH),s=0.3+rnd(.8),p=rnd(1)})
+  end
  end
  state="play"
  music_on=true
- poke(0x5538,muted and 0 or 0x40)
- poke(0x5539,muted and 0 or 0x40)
+ mtempo=cfg.tempo
  mtick=0
  mstep=0
- say("X PULA   Z SHURIKEN",190)
+ poke(0x5538,muted and 0 or 0x40)
+ poke(0x5539,muted and 0 or 0x40)
+ say(cfg.name,180)
+ if not silent then playsfx("enter") end
+end
+
+function to_map(kind)
+ state="map"
+ lives=3
+ shake=0
+ prompt=0
+ tt=0
+ parts={}
+ shuris={}
+ flies={}
+ leaves={}
+ flakes={}
+ mapd=MAPNODES[curlevel].d
+ mapx,mapy=map_path_at(mapd)
+ mapface=1
+ mapwalk=0
+ mapcam=mid(0,mapx-SW/2,MAPW-SW)
+ mapnear=MAPNODES[curlevel]
+ stop_music()
+ music_on=true
+ mtempo=14
+ mtick=0
+ poke(0x5538,muted and 0 or 0x40)
+ poke(0x5539,muted and 0 or 0x40)
+ if kind=="win" then
+  cleared[curlevel]=true
+  if curlevel==1 then unlocked=2 end
+  if cleared[1] and cleared[2] then
+   say("JOGO COMPLETO!",240)
+  else
+   say("FASE CONCLUIDA",180)
+  end
+ else
+  say("DE VOLTA AO MAPA",180)
+ end
+end
+
+function newgame(silent)
+ score=0
+ lives=3
+ cleared={false,false}
+ unlocked=1
+ curlevel=1
+ curmap=level
+ cam=0
+ check=24
+ shake=0
+ prompt=0
+ tt=0
+ enter_level(1,silent)
 end
 
 function say(s,t)
@@ -1135,8 +1734,9 @@ function update_player()
  if p.dash>0 and hit(p.x,p.y+1,PWF,PHF) then p.ground=true end
 
  -- checkpoint
- if p.ground and p.x>440 and check<440 then
-  check=470
+ local cfg=LEVELS[curlevel]
+ if p.ground and p.x>cfg.check_x and check<cfg.check_x then
+  check=cfg.check_spawn
   playsfx("check")
   if tt<=0 then say("CHECKPOINT",90) end
  end
@@ -1288,6 +1888,44 @@ function update_ambient()
   l.y+=0.25+l.s*0.2
   if l.y>WH-30 then l.y=-5 l.x=rnd(WW) end
  end
+ for f in all(flakes) do
+  f.p+=0.015
+  f.x+=0.15+sin(f.p*2)*0.45
+  f.y+=0.35+f.s
+  if f.y>WH then f.y=-4 f.x=rnd(WW) end
+  if f.x<0 then f.x+=WW elseif f.x>WW then f.x-=WW end
+ end
+end
+
+function update_map()
+ local dir=(down(1) and 1 or 0)-(down(0) and 1 or 0)
+ if dir~=0 then
+  mapd=mid(0,mapd+dir*1.25,MAPLEN)
+  mapface=dir
+  mapwalk+=1
+ else
+  mapwalk=0
+ end
+ mapx,mapy=map_path_at(mapd)
+ local target=mid(0,mapx-SW/2,MAPW-SW)
+ mapcam+=(target-mapcam)*.15
+ if abs(mapcam-target)<.2 then mapcam=target end
+ mapnear=nil
+ for n in all(MAPNODES) do
+  if abs(mapd-n.d)<16 then mapnear=n end
+ end
+ if pressed(5) or pressed(4) then
+  if mapnear then
+   if mapnear.id<=unlocked then
+    enter_level(mapnear.id)
+   else
+    say("BLOQUEADO: VENCA O TEMPLO",120)
+    playsfx("deny")
+   end
+  else
+   say("VA ATE UMA FASE",90)
+  end
+ end
 end
 
 function _update()
@@ -1300,9 +1938,19 @@ function _update()
   update_parts()
   update_ambient()
   if pressed(5) or pressed(4) then
-   newgame()
+   newrun()
    playsfx("start")
   end
+  input_end()
+  return
+ end
+
+ if state=="map" then
+  if tt>0 then tt-=1 end
+  if prompt>0 then prompt-=1 end
+  update_map()
+  update_parts()
+  update_ambient()
   input_end()
   return
  end
@@ -1312,8 +1960,7 @@ function _update()
 
  if state~="play" then
   if pressed(5) or pressed(4) then
-   newgame()
-   playsfx("start")
+   to_map(state=="win" and "win" or "over")
   end
   update_parts()
   update_ambient()
@@ -1327,7 +1974,8 @@ function _update()
   update_enemies()
   if state=="play" then
    update_shuris()
-   if p.ground and p.x>868 and p.y<130 then
+   local cfg=LEVELS[curlevel]
+   if p.ground and p.x>cfg.goal_x and p.y<cfg.goal_y then
     if p.s1 and p.s2 then
      state="win"
      score+=1000
@@ -1375,6 +2023,21 @@ function draw_bg(cx)
  sspr(near,flr(cx*.35),0,SW,130,0,140,SW,130)
 end
 
+function draw_snow_bg(cx)
+ blit(snowsky,get_draw_target(),0,0,0,0,SW,SH)
+ for i=1,9 do
+  local sx=(i*53+17)%SW
+  local sy=(i*31+9)%140
+  if ((frame\8)+i)%5~=0 then pset(sx,sy,(i%3==0) and SNOW.snow or SNOW.snow2) end
+ end
+ for c in all(snowclouds) do
+  local x=(c.x-cx*0.08+frame*c.spd)%760-80
+  spr(c.ud,flr(x),c.y)
+ end
+ sspr(snowfar,flr(cx*.12),0,SW,170,0,100,SW,170)
+ sspr(snownear,flr(cx*.35),0,SW,130,0,140,SW,130)
+end
+
 -- fundo do titulo
 function draw_title_scene()
  draw_bg(0)
@@ -1419,15 +2082,357 @@ function draw_title_scene()
  -- rodape
  ptext("SCOGAMES 2026",SW-96,SH-12,6)
 end
+
+-- ============================================================
+-- mapa de fases (overworld)
+-- ============================================================
+function draw_map_flag(x,y,c)
+ line(x,y,x,y-22,9)
+ pset(x,y-23,10)
+ line(x,y-22,x+12,y-18,c)
+ line(x,y-18,x+12,y-18,c)
+ line(x,y-22,x,y-18,c)
+ pset(x+12,y-18,c)
+end
+
+function draw_map_lock(x,y)
+ circ(x,y-2,4,10)
+ rectfill(x-5,y+1,x+5,y+9,10)
+ rectfill(x-4,y+2,x+4,y+8,9)
+ pset(x,y+4,0)
+ line(x,y+5,x,y+6,0)
+end
+
+function build_map()
+ local ud=userdata("u8",MAPW,MAPH)
+ usetarget(ud)
+ cls(C.sky0)
+ -- ceu em bandas
+ local bands={
+  {0,70,C.sky0},{70,130,C.sky1},{130,180,C.sky2},
+  {180,215,C.sky3},{215,MAPH,C.sky4},
+ }
+ for b in all(bands) do rectfill(0,b[1],MAPW-1,b[2]-1,b[3]) end
+ for i=1,#bands-1 do
+  local y=bands[i][2]
+  for yy=y-4,y-1 do
+   local t=(yy-(y-4))/4
+   for x=0,MAPW-1 do
+    if rnd(1)<t then pset(x,yy,bands[i+1][3]) else pset(x,yy,bands[i][3]) end
+   end
+  end
+ end
+ -- estrelas
+ srand(900)
+ for i=1,190 do
+  local x=flr(rnd(MAPW))
+  local y=flr(rnd(180))
+  local dx=x-760
+  local dy=y-62
+  if dx*dx+dy*dy>34*34 then
+   local r=rnd(1)
+   pset(x,y,(r<0.55) and 6 or ((r<0.85) and 7 or C.sky3))
+   if r>0.94 then pset(x+1,y,6) end
+  end
+ end
+ -- lua
+ local mx,my,mr=760,62,26
+ srand(901)
+ for i=1,900 do
+  local a=rnd(1)
+  local rr=mr+2+rnd(1)*30
+  local x=flr(mx+cos(a)*rr)
+  local y=flr(my+sin(a)*rr)
+  if rnd(1)<(1-(rr-mr)/32)*0.65 then
+   pset(x,y,(i%4==0) and C.sky3 or C.sky4)
+  end
+ end
+ circfill(mx,my,mr,C.moon)
+ dither(mx-15,my+5,mx-6,my+13,6,0)
+ dither(mx+3,my-12,mx+11,my-5,6,1)
+ dither(mx+7,my+8,mx+14,my+14,C.sky4,0)
+ -- montanhas distantes
+ srand(902)
+ local function fy(x) return flr(150+sin(x/200)*20+sin(x/67+0.8)*8+sin(x/23+1.1)*3) end
+ for x=0,MAPW-1 do
+  local y=fy(x)
+  line(x,y,x,230,C.far)
+  pset(x,y,C.sky3)
+  if y<130 then pset(x,y+1,C.sky3) end
+ end
+ -- pico nevado a direita
+ for x=660,MAPW-1 do
+  local t=abs(x-850)/210
+  local y=flr(220-130*(1-t))
+  if y<82 then y=82 end
+  if y<220 then
+   line(x,y,x,229,SNOW.far)
+   if y<150 then
+    pset(x,y,SNOW.snow)
+    if (x+y)%3==0 then pset(x,y+1,SNOW.snow2) end
+   else
+    pset(x,y,SNOW.near)
+   end
+  end
+ end
+ -- colinas proximas
+ srand(903)
+ local function ny(x) return flr(190+sin(x/150+0.7)*14+sin(x/53+2)*6) end
+ for x=0,MAPW-1 do
+  line(x,ny(x),x,229,C.near)
+  pset(x,ny(x),C.far)
+ end
+ -- terreno sob a trilha
+ for x=0,MAPW-1 do
+  local py=flr(MAPPATHY[x] or 214)
+  local top=py+6
+  local c1,c2,edge
+  if x>700 then
+   c1,c2,edge=SNOW.ice2,SNOW.rock,SNOW.snow
+  elseif x>560 then
+   c1,c2,edge=C.grass2,SNOW.rock,SNOW.snow2
+  else
+   c1,c2,edge=C.grass2,C.grass,C.grass
+  end
+  if x>408 and x<492 then
+   line(x,top,x,MAPH-1,0)
+   line(x,top,x,top+10,21)
+  else
+   line(x,top,x,MAPH-1,c1)
+   line(x,top+8,x,MAPH-1,c2)
+   pset(x,top,edge)
+   pset(x,top+1,edge)
+   if x%3==0 then pset(x,top+2,c1) end
+   if x%5==0 then pset(x,top+3+((x*7)%14),c2) end
+  end
+ end
+ -- arvores atras da trilha
+ srand(904)
+ for i=1,34 do
+  local x=flr(rnd(MAPW))
+  local py=flr(MAPPATHY[x] or 214)
+  if abs(x-48)>42 and abs(x-300)>52 and abs(x-880)>62 then
+   if x<560 then
+    draw_bamboo(x,py+12,i*23)
+   else
+    draw_pine(x,py+12,i*29,true)
+   end
+  end
+ end
+ -- trilha: borda escura, corpo de terra e centro claro
+ for i=1,#MAPSEG do
+  local s=MAPSEG[i]
+  line(s.x,s.y-4,s.x+s.dx,s.y+s.dy-4,21)
+  line(s.x,s.y+4,s.x+s.dx,s.y+s.dy+4,21)
+  line(s.x,s.y-3,s.x+s.dx,s.y+s.dy-3,4)
+  line(s.x,s.y+3,s.x+s.dx,s.y+s.dy+3,4)
+  line(s.x,s.y-1,s.x+s.dx,s.y+s.dy-1,9)
+  line(s.x,s.y+1,s.x+s.dx,s.y+s.dy+1,9)
+  line(s.x,s.y,s.x+s.dx,s.y+s.dy,10)
+ end
+ -- marcas da trilha
+ for d=0,MAPLEN,18 do
+  local x,y=map_path_at(d)
+  pset(flr(x),flr(y),9)
+ end
+ -- ponte sobre o desfiladeiro
+ for x=410,488,8 do
+  local y=flr(path_y_at_x(x))
+  rectfill(x,y-5,x+5,y+1,4)
+  line(x,y-5,x+5,y-5,9)
+  line(x,y+1,x+5,y+1,20)
+  pset(x+2,y-2,10)
+ end
+ local ry1=flr(path_y_at_x(408))-14
+ local ry2=flr(path_y_at_x(492))-14
+ line(408,ry1,492,ry2,9)
+ for x=408,492,21 do
+  local y=flr(path_y_at_x(x))
+  line(x,y-14,x,y-5,9)
+  pset(x,y-15,10)
+ end
+ -- detalhes do chao
+ srand(905)
+ for i=1,130 do
+  local x=flr(rnd(MAPW))
+  local py=flr(MAPPATHY[x] or 214)
+  local yy=py+12+flr(rnd(46))
+  if x<560 then
+   if rnd(1)<0.55 then
+    line(x,yy,x,yy-2-flr(rnd(2)),C.grass2)
+    pset(x+1,yy-2,C.grass)
+   else
+    rectfill(x,yy,x+1,yy+1,C.stone2)
+    pset(x,yy,C.stone)
+   end
+  else
+   pset(x,yy,SNOW.snow2)
+   if rnd(1)<0.3 then pset(x+1,yy,SNOW.ice) end
+  end
+ end
+ usetarget(nil)
+ return ud
+end
+
+function draw_map_house(x,base)
+ -- sombra
+ ovalfill(x-28,base-3,x+28,base+2,0)
+ -- corpo
+ rectfill(x-24,base-30,x+24,base-2,8)
+ rectfill(x-24,base-30,x+24,base-4,24)
+ for y=base-28,base-6,6 do line(x-22,y,x+22,y,20) end
+ -- telhado
+ for i=0,24 do
+  line(x-30+i,base-30-i,x+30-i,base-30-i,8)
+  line(x-30+i,base-29-i,x+30-i,base-29-i,24)
+ end
+ line(x-30,base-30,x,base-54,8)
+ line(x+30,base-30,x,base-54,8)
+ -- porta
+ rectfill(x-7,base-18,x+7,base-2,4)
+ rectfill(x-5,base-16,x+5,base-2,20)
+ pset(x-2,base-9,10) pset(x+2,base-9,10)
+ -- janela
+ rectfill(x-19,base-22,x-11,base-14,9)
+ line(x-19,base-18,x-11,base-18,10)
+ pset(x-18,base-21,7)
+ -- chamine
+ rectfill(x+12,base-52,x+19,base-38,21)
+ rectfill(x+12,base-52,x+19,base-50,6)
+ -- fumaca
+ for i=0,5 do
+  local a=frame*0.02+i*0.3
+  local yy=base-58-i*7-((frame*0.5+i*9)%7)
+  local xx=x+15+sin(a)*4
+  circfill(flr(xx),yy,2+(i%2),(i%2==0) and 21 or 6)
+ end
+end
+
+function draw_map_node(n,sx,base)
+ local done=cleared[n.id]
+ local locked=n.id>unlocked
+ local flagc=done and C.grass or (locked and 5 or 8)
+ if n.id==1 then
+  if (frame\16)%2==0 then circ(sx,base-28,30,35) end
+  pagoda(sx,base-2,44,8,25)
+  rectfill(sx-7,base-16,sx+7,base-2,21)
+  rectfill(sx-5,base-14,sx+5,base-2,9)
+  line(sx-5,base-2,sx+5,base-2,10)
+  rectfill(sx-10,base-2,sx+10,base+2,5)
+  line(sx-10,base-2,sx+10,base-2,6)
+  draw_map_flag(sx+24,base-8,flagc)
+ else
+  -- pico de neve
+  for y=base-72,base do
+   local ww=flr((y-(base-72))*0.62)
+   line(sx-ww,y,sx+ww,y,SNOW.far)
+  end
+  for y=base-72,base-52 do
+   local ww=flr((y-(base-72))*0.62)
+   line(sx-ww,y,sx+ww,y,SNOW.snow)
+  end
+  -- portal de gelo
+  rectfill(sx-20,base-40,sx-14,base-2,SNOW.ice2)
+  rectfill(sx+14,base-40,sx+20,base-2,SNOW.ice2)
+  rectfill(sx-24,base-44,sx+24,base-38,SNOW.ice)
+  rectfill(sx-24,base-44,sx+24,base-43,SNOW.snow)
+  rectfill(sx-10,base-32,sx+10,base-2,0)
+  rectfill(sx-8,base-30,sx+8,base-2,SNOW.ice2)
+  rectfill(sx-6,base-28,sx+6,base-2,SNOW.ice)
+  -- pingentes
+  for i=-20,20,10 do
+   line(sx+i,base-38,sx+i,base-34,SNOW.snow)
+  end
+  draw_map_flag(sx+26,base-10,flagc)
+ end
+ if locked then draw_map_lock(sx,base-58) end
+ -- marcador numerado
+ circfill(sx,base+10,8,0)
+ circ(sx,base+10,8,done and C.grass or 10)
+ smalltext(tostr(n.id),sx-2,base+6,1,done and C.grass or 10)
+end
+
+function draw_map()
+ local cx=flr(mapcam)
+ blit(mapbmp,get_draw_target(),cx,0,0,0,SW,SH)
+ -- nuvens
+ for c in all(clouds) do
+  local x=(c.x-cx*0.12+frame*c.spd)%(MAPW+180)-90
+  spr(c.ud,flr(x),c.y)
+ end
+ -- casa inicial
+ draw_map_house(48-cx,214)
+ -- nos de fase
+ for n in all(MAPNODES) do
+  local sx=n.x-cx
+  if sx>-100 and sx<SW+100 then draw_map_node(n,sx,n.y) end
+ end
+ -- estrela de jogo completo
+ if cleared[1] and cleared[2] then
+  local sx=MAPNODES[2].x-cx
+  local sy=MAPNODES[2].y-88
+  if sx>-20 and sx<SW+20 then
+   line(sx-8,sy,sx+8,sy,10)
+   line(sx-8,sy,sx-12,sy-8,10)
+   line(sx,sy,sx,sy-11,10)
+   line(sx+8,sy,sx+12,sy-8,10)
+   pset(sx,sy-12,7)
+  end
+ end
+ -- ninja
+ local px=mapx-cx
+ local run=(mapwalk>0) and (flr(mapwalk/5)%2+1) or 0
+ draw_ninja(flr(px)-5,flr(mapy)-18,mapface,run,false,false)
+ -- painel do no proximo
+ if mapnear then
+  local n=mapnear
+  local nm=LEVELS[n.id].name
+  local ok=n.id<=unlocked
+  local l2=ok and "X ENTRAR" or "BLOQUEADO"
+  local w=max(#nm,#l2)*5+18
+  local x=mid(8,flr(n.x-cx-w/2),SW-w-8)
+  local y=mid(24,flr(n.y)-98,SH-58)
+  draw_panel(x,y,x+w,y+32,ok and 10 or 8)
+  ptext(nm,x+9,y+6,ok and 10 or 6)
+  ptext(l2,x+9,y+18,ok and 7 or 8)
+ end
+ -- HUD
+ blit(hudbar,get_draw_target(),0,0,0,0,SW,16)
+ for i=1,3 do draw_mask(8+(i-1)*10,3,i<=lives) end
+ ptext("MAPA",flr((SW-4*5)/2),3,10)
+ local s="PONTOS "..string.format("%06d",score)
+ ptext(s,SW-10-#s*5,3,10)
+ local nc=(cleared[1] and 1 or 0)+(cleared[2] and 1 or 0)
+ ptext("FASES "..nc.."/2",42,3,7)
+ local hint="SETAS ANDAR   X ENTRAR"
+ ptext(hint,flr((SW-#hint*5)/2),SH-12,7)
+ if tt>0 then
+  local w=#toast*5+14
+  local x=flr((SW-w)/2)
+  rectfill(x,22,x+w,33,0)
+  rect(x,22,x+w,33,9)
+  pset(x,22,7) pset(x+w,33,7)
+  ptext(toast,x+7,25,7)
+ end
+ if muted then ptext("MUDO",8,SH-12,6) end
+end
+
 function draw_world()
  local cx=flr(cam)
  if shake>0 then cx+=flr(sin(frame*1.9)*shake) end
  cx=mid(0,cx,WW-SW)
- draw_bg(cx)
- sspr(levelbmp,cx,0,SW,SH,0,0,SW,SH)
+ local snow=curlevel==2
+ local cfg=LEVELS[curlevel]
+ if snow then draw_snow_bg(cx) else draw_bg(cx) end
+ sspr(snow and snowbmp or levelbmp,cx,0,SW,SH,0,0,SW,SH)
  camera(cx,0)
- draw_lantern(464,224,check>400)
- draw_torii(896,112)
+ if snow then
+  draw_snow_lantern(cfg.check_spawn-6,224,check>cfg.check_x)
+  draw_snow_torii(cfg.torii_x,112)
+ else
+  draw_lantern(cfg.check_spawn-6,224,check>cfg.check_x)
+  draw_torii(cfg.torii_x,112)
+ end
  for s in all(scrolls) do
   if not s.got then draw_scroll(s) end
  end
@@ -1436,29 +2441,42 @@ function draw_world()
  end
  for s in all(shuris) do draw_shuri(s) end
  draw_parts()
- -- vagalumes
- for f in all(flies) do
-  if f.x>cx-8 and f.x<cx+SW+8 then
-   local sx=flr(f.x-cx)
-   local sy=flr(f.y)
-   local tw=(frame*0.07+f.p)%1
-   if tw<0.55 then
-    pset(sx,sy,(tw<0.25) and 26 or 10)
-    pset(sx+1,sy,C.grass2)
+ if not snow then
+  -- vagalumes
+  for f in all(flies) do
+   if f.x>cx-8 and f.x<cx+SW+8 then
+    local sx=flr(f.x-cx)
+    local sy=flr(f.y)
+    local tw=(frame*0.07+f.p)%1
+    if tw<0.55 then
+     pset(sx,sy,(tw<0.25) and 26 or 10)
+     pset(sx+1,sy,C.grass2)
+    end
    end
   end
- end
- -- folhas
- for l in all(leaves) do
-  if l.x>cx-4 and l.x<cx+SW+4 then
-   pset(flr(l.x-cx),flr(l.y),C.bamboo)
-   if l.s>0.5 then pset(flr(l.x-cx)+1,flr(l.y),C.bamboo2) end
+  -- folhas
+  for l in all(leaves) do
+   if l.x>cx-4 and l.x<cx+SW+4 then
+    pset(flr(l.x-cx),flr(l.y),C.bamboo)
+    if l.s>0.5 then pset(flr(l.x-cx)+1,flr(l.y),C.bamboo2) end
+   end
   end
  end
  if not (p.inv>0 and (frame\4)%2==0) then
   draw_ninja(flr(p.x),flr(p.y),p.face,
    (p.ground and abs(p.vx)>.2) and (flr(p.anim/5)%2+1) or 0,
    not p.ground, p.dash>0)
+ end
+ if snow then
+  -- nevasca em primeiro plano
+  for f in all(flakes) do
+   if f.x>cx-4 and f.x<cx+SW+4 then
+    local sx=flr(f.x-cx)
+    local sy=flr(f.y)
+    pset(sx,sy,(f.s>0.9) and SNOW.snow or SNOW.snow2)
+    if f.s>1.15 then pset(sx+1,sy,SNOW.ice) end
+   end
+  end
  end
  camera()
 end
@@ -1522,28 +2540,34 @@ end
 function draw_overlay()
  if state=="win" then
   draw_panel(108,62,372,198,10)
-  ctext("TEMPLO ALCANCADO",78,10)
-  ctext("PONTOS "..score,96,7)
-  ctext("PERGAMINHOS 2/2",110,C.grass)
-  draw_scroll_icon(222,126,true)
-  draw_scroll_icon(240,126,true)
-  ctext("OBRIGADO POR JOGAR",142,6)
-  if (frame\26)%2==0 then ctext("X PARA REINICIAR",160,7) end
+  ctext("FASE CONCLUIDA",74,10)
+  ctext(LEVELS[curlevel].name,88,7)
+  ctext("PONTOS "..score,102,7)
+  ctext("PERGAMINHOS 2/2",116,C.grass)
+  draw_scroll_icon(222,130,true)
+  draw_scroll_icon(240,130,true)
+  ctext("OBRIGADO POR JOGAR",148,6)
+  if (frame\26)%2==0 then ctext("X VOLTA AO MAPA",164,7) end
   if frame%9==0 then
    burst(110+rnd(270),70+rnd(60),10,(rnd(1)<.5) and 10 or 25)
   end
  elseif state=="over" then
   draw_panel(120,74,360,196,8)
-  ctext("GAME OVER",90,8)
-  ctext("PONTOS "..score,108,7)
+  ctext("GAME OVER",88,8)
+  ctext(LEVELS[curlevel].name,104,6)
+  ctext("PONTOS "..score,118,7)
   local n=(p.s1 and 1 or 0)+(p.s2 and 1 or 0)
-  ctext("PERGAMINHOS "..n.."/2",126,6)
-  if (frame\26)%2==0 then ctext("X PARA TENTAR DE NOVO",150,6) end
+  ctext("PERGAMINHOS "..n.."/2",132,6)
+  if (frame\26)%2==0 then ctext("X VOLTA AO MAPA",152,6) end
  end
 end
 function _draw()
  if state=="title" then
   draw_title_scene()
+  return
+ end
+ if state=="map" then
+  draw_map()
   return
  end
  draw_world()
@@ -1564,18 +2588,27 @@ function _init()
  poke(0x5f5d,255)
  set_palette()
  init_audio()
+ build_mappath()
  srand(7)
  sky=build_sky()
  far=build_far()
  near=build_near()
- levelbmp=build_level()
+ levelbmp=build_level(level,THEMES.forest)
+ snowbmp=build_level(snowlevel,THEMES.snow)
+ snowsky=build_snow_sky()
+ snowfar=build_snow_far()
+ snownear=build_snow_near()
  hudbar=build_hudbar()
  clouds={}
  for i=1,4 do
   add(clouds,{ud=build_cloud(),x=i*180+rnd(90),y=88+rnd(58),spd=0.06+rnd(.08)})
  end
- srand(4242)
- newgame()
+ snowclouds={}
+ for i=1,4 do
+  add(snowclouds,{ud=build_snow_cloud(),x=i*180+rnd(90),y=88+rnd(58),spd=0.06+rnd(.08)})
+ end
+ mapbmp=build_map()
+ newgame(true)
  state="title"
  stop_music()
  music_on=true
